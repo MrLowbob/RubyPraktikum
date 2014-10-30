@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 Ruby ist ganz ganz toll oder so
+=======
+HALLO HERR HORST
+>>>>>>> origin/master
