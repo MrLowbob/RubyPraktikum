@@ -17,14 +17,18 @@ require 'ext_pr1_v4'
 
 def larger_sum_square(val1, val2, val3)
   check_pre((val1.int? and val2.int? and val3.int?))
-  larger_numbers(val1, val2, val3)[0]**2 + larger_numbers(val1, val2, val3)[1]**2 
+  a,b = larger_numbers(val1, val2, val3)
+  square(a) + square(b)
 end
 
-# erst suche ich die größere der ersten beiden Zahlen raus, dann kontrollier ich welche größer ist:
-# die kleinere der ersten beiden oder die dritte.
-# die reihenfolge, welche nun wirklich größer als welche andere ist, spielt hier keine Rolle, da die Ergebnisse
-# ohnehin nur quadriert und dann addiert werden sollen (kommutativgesetz macht reihenfolge egal)
+def square(x)
+  x**2
+end
+
 def larger_numbers(val1, val2, val3)
   check_pre((val1.int? and val2.int? and val3.int?))
-  [max_int(min_int(val1, val2), val3), max_int(val1, val2)]
+  #[max_int(min_int(val1, val2), val3), max_int(val1, val2)]
+  
+  #kürzere (kürzeste) Rechenzeit
+  (val1 >= val2) ? [((val2 >= val3) ? val2 : val3), val1] : [((val1 >= val3) ? val1 : val3), val2]
 end

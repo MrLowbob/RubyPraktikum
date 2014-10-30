@@ -4,9 +4,13 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
 require 'ext_pr1_v4'
 
 
-HIGHER_TEMP = 220000000000000000
+HIGHER_TEMP = 22
 LOWER_TEMP = 16
 ABS_ZERO = -273
+
+def temp?(temp) 
+  temp.int? and temp >= ABS_ZERO 
+end
 
 # Specification
 # check, if temperature is too cold (<16°)
@@ -16,8 +20,8 @@ ABS_ZERO = -273
 # [-274] => Err; }
 
 def zu_kalt?(temp)
-  check_pre((temp.int? and temp >= ABS_ZERO))
-  temp < LOWER_TEMP ? true : false
+  check_pre((temp?(temp)))
+  temp < LOWER_TEMP
 end
 
 # Specification
@@ -28,8 +32,8 @@ end
 # [-274] => Err; }
 
 def zu_warm?(temp)
-  check_pre((temp.int? and temp >= ABS_ZERO))
-  temp > HIGHER_TEMP ? true : false
+  check_pre((temp?(temp)))
+  temp > HIGHER_TEMP
 end
 
 # Specification
@@ -40,12 +44,13 @@ end
 # [18.5] => Err; [-274] => Err; }
 
 def angenehm?(temp)
-  check_pre((temp.int? and temp >= ABS_ZERO))
-  (not zu_kalt?(temp) and not zu_warm?(temp)) ? true : false
+  check_pre((temp?(temp)))
+  #(not zu_kalt?(temp) and not zu_warm?(temp))
   #
-  #(zu_kalt?(temp) or zu_warm?(temp)) ? false : true
+  #not (zu_kalt?(temp) or zu_warm?(temp))
   #
-  #(!zu_kalt?(temp)) ? (!zu_warm?(temp) ? true : false) : false
+  #(!zu_kalt?(temp)) ? (!zu_warm?(temp)) : false
+   (zu_kalt?(temp) ? false : (zu_warm?(temp) ? false : true))
 end
 
 # Specification
@@ -56,7 +61,7 @@ end
 # [18.5] => Err; [-274] => Err; }
 
 def unangenehm?(temp)
-  check_pre((temp.int? and temp >= ABS_ZERO))
+  check_pre((temp?(temp)))
   #(temp >= 16 and temp <= 22 ) ? false : true
   not angenehm?(temp)
 end

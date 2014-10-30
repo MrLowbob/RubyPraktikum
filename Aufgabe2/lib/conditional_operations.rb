@@ -6,7 +6,7 @@ require 'ext_pr1_v4'
 
 # Spezification
 # return Minimum of 2 arguments:
-# min_int ::= Int x Int ->? Int ::
+# min_int ::= Int x Int -> Int ::
 # (int1, int2) :::: int1 < int2 -> int1 :::: int1 > int2 -> int2 ::
 # Tests { [1,0] => 0; [0,-1] => -1; [-2,2] => -2; [5,2] => 2;
 # ["1",0] => Err; [1,1] => 1; [1.5,2] => Err; }
@@ -19,7 +19,7 @@ end
 
 # Spezification
 # return Maximum of 2 arguments:
-# min_int ::= Int x Int ->? Int ::
+# min_int ::= Int x Int -> Int ::
 # (int1, int2) :::: int1 > int2 -> int1 :::: int1 < int2 -> int2 ::
 # Tests { [1,0] => 1; [0,-1] => 0; [-2,2] => 2; [5,2] => 5;
 # ["1",0] => Err; [1,1] => 1; [1.5,2] => Err; }
@@ -33,12 +33,12 @@ end
 # Spezifcaton:
 # check if a number is within a range
 # within? ::= Int x Int x Int ->? bool ::
-# (val, lower, upper) :::: lower <= upper :::: lower <= val <= upper -> true :::: val < lower -> false ::::
+# (val, lower, upper) :::: lower <= val <= upper -> true :::: val < lower -> false ::::
 # val > upper -> false ::
 # Tests { [1,0,4] => true; [-2,-5,2] => true; [1,1,2] => true; [2,1,2] => true; [1,2,3] => false; [2,2,2] => true;
 # [3,1,2] => false; ["3",2,4] => Err; [3.2,2,5] => Err; 
 
 def within?(val, lower, upper)
-  check_pre((val.int? and lower.int? and upper.int? and lower <= upper))
-  (val >= lower and val <= upper) ? true : false
+  check_pre((val.int? and lower.int? and upper.int? ))      # "and lower <= upper" nicht nötig, bzw hat nachteile, da fehler wenn leeres Intervall
+  (val >= lower and val <= upper)                           #, ggf nur in bestimmten fällen sinnvoller
 end
