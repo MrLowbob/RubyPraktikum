@@ -4,7 +4,7 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
 require 'ext_pr1_v4'
 
 
-HIGHER_TEMP = 220000000000000000
+HIGHER_TEMP = 22
 LOWER_TEMP = 16
 ABS_ZERO = -273
 
