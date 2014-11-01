@@ -7,15 +7,23 @@ require 'ext_pr1_v4'
 # Classes for DayNum and DaySym
 # DayNum ::= DayNum[:num] ::= (1..7) ::
 # DaySym ::= DaySym[:sym] :: {:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So} ::
-# Day ::=(DayNum | DaySym) ::
+# Day ::= (DayNum | DaySym) ::
 #
 
-def_class(:DayNum,[:num])
-def_class(:DaySym,[:sym])
+def_class(:DAY_NUM,[:num])
+def_class(:DAY_SYM,[:sym])
 
-DayNum[(1..7)]
-DaySym[[:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So]]
+DayNum = DAY_NUM[(1..7)]
+DaySym = DAY_SYM[[:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So]]
+
+def day_num?(any)       # => brauchen hier obj.day_num? aber weiß nicht wie...
+  any.int? and DayNum.num.include?(any)
+end
+
+def day_sym?(any)
+  any.symbol? and DaySym.sym.include?(any)
+end
 
 def day?(any)
-  any.DayNum? or any.DaySym?
+  day_num?(any) or day_sym?(any)
 end
