@@ -10,13 +10,35 @@ require 'ext_pr1_v4'
 # Day ::= (DayNum | DaySym) ::
 #
 
-def_class(:Daynum,[:num])
-def_class(:Daysym,[:sym])
+DAY_SYM = [:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So]
+DAY_NUM = (1..DAY_SYM.size).to_a
 
-Daynum[(1..7)]
-Daysym[[:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So]]
+def_class(:DayNum,[:num]) {
+  def invariant?()
+    DAY_NUM.include?(num)
+  end
+}
+def_class(:DaySym,[:sym]) {
+  def invariant?()
+    DAY_SYM.include?(sym)
+  end
+}
 
+DAY_SYM_SEQ = DAY_SYM.map{|sym| DaySym[sym]}
+DAY_NUM_SEQ = DAY_NUM.map{|num| DayNum[num]}
+#DAYS_IN_WEEK = DAY_SYM_SEQ.size
+#DayIndex = (1..DAYS_IN_WEEK)
 
 def day?(any)
-  any.daynum? or any.daysym?
+  any.day_num? || any.day_sym?
+end
+
+
+def to_day(typ,var)
+  typ.day_num? or typ.day_sym?
+  var 
+end
+
+def day_shift(var,int1)
+  
 end

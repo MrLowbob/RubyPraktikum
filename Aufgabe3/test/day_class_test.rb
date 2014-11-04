@@ -9,13 +9,9 @@ require 'day_class'
 
 class DayTest < Test::Unit::TestCase
   def test_day?
-    assert_equal(true,day?(Daysym[:Mo]))
-    assert_equal(true,day?(Daysym[:So]))
-    assert_equal(false,day?(Daysym["Do"]))
-    assert_equal(false,day?(Daysym[1]))
-    assert_equal(true,day?(Daynum[1]))
-    assert_equal(true,day?(Daynum[7]))
-    assert_equal(false,day?(Daynum[:Mo]))
-    assert_equal(false,day?(Daynum["1"]))
+    assert_equal(true,day?(DaySym[:Mo]))
+    assert_equal(true,day?(DaySym[:So]))
+    assert_equal(true,day?(DayNum[1]))
+    assert_equal(true,day?(DayNum[7]))
   end
 end
