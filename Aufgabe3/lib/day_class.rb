@@ -30,7 +30,7 @@ DAY_NUM_SEQ = DAY_NUM.map{|num| DayNum[num]}
 #DayIndex = (1..DAYS_IN_WEEK)
 
 def day?(any)
-  any.day_num? || any.day_sym?
+  (num_sym(any)).day_num? || (num_sym(any)).day_sym?
 end
 
 
@@ -45,9 +45,9 @@ end
 
 #day_shift ::= Day x Int->Day::Test{(DaySym[:Mo],-2) => DaySym[:Sa]) 
 def day_shift(day,int)
-  day.day_sym? and int.int?
-  DaySym[DAY_SYM[(((DAY_SYM.index(day.sym)))+int)%DAY_SYM.size]]
- # to_day((day_sym_to_day_num(day).num + int)%DAY_SYM.size)
+  (num_sym(day)).day_sym? and int.int?
+ # DAY_SYM[(((DAY_SYM.index((num_sym(day)).sym)))+int)%DAY_SYM.size]
+  to_day(day,(((DAY_SYM.index(day))+int)%DAY_SYM.size)+1)
 end
 
 #Convertingfunction for nicer input
