@@ -15,12 +15,13 @@ DAY_NUM = (1..DAY_SYM.size).to_a
 
 def_class(:DayNum,[:num]) {
   def invariant?()
-    DAY_NUM.include?(num)
+    #DAY_NUM.include?(num)
+    num.in?(DAY_NUM)
   end
 }
 def_class(:DaySym,[:sym]) {
   def invariant?()
-    DAY_SYM.include?(sym)
+    sym.in?(DAY_SYM)
   end
 }
 
@@ -30,33 +31,25 @@ DAY_NUM_SEQ = DAY_NUM.map{|num| DayNum[num]}
 #DayIndex = (1..DAYS_IN_WEEK)
 
 def day?(any)
-  (num_sym(any)).day_num? || (num_sym(any)).day_sym?
+  any.day_num? || any.day_sym?
 end
 
-
-def to_day(typ,var)
-  day?(num_sym(typ)) and var.int? or var.symbol?
-  if    num_sym(typ).day_num?
-    var.int? ? var : day_sym_to_day_num(var) 
-  elsif num_sym(typ).day_sym?
-    num_sym(var).day_sym? ? var : day_num_to_day_sym(var)
+#to_day ::= Day x Day -> Day :: (proto_day, day)
+def to_day(proto_day,day)
+  check_pre((day?(day)))
+  if    proto_day.day_num?  then  day.day_num? ? day : day_sym_to_day_num(day) 
+  elsif proto_day.day_sym?  then  day.day_sym? ? day : day_num_to_day_sym(day)
+  else  check_pre(false)
   end
 end
 
-#day_shift ::= Day x Int->Day::Test{(DaySym[:Mo],-2) => DaySym[:Sa]) 
+#day_shift ::= Day x Int -> Day :: Test{(DaySym[:Mo],-2) => DaySym[:Sa]) 
 def day_shift(day,int)
-  (num_sym(day)).day_sym? and int.int?
+  check_pre(int.int?)
  # DAY_SYM[(((DAY_SYM.index((num_sym(day)).sym)))+int)%DAY_SYM.size]
-  to_day(day,(((DAY_SYM.index(day))+int)%DAY_SYM.size)+1)
-end
-
-#Convertingfunction for nicer input
-#num_sym ::= Int x Symbol -> DayNum[Int] or DaySyn[Symbol] ::
-def num_sym(var)
-  if var.int?
-    DayNum[var]
-  elsif var.symbol?
-    DaySym[var]
+  if    (day.day_num?)  then  to_day(day,DAY_NUM_SEQ[((DAY_NUM_SEQ.index(day))+int)%DAY_NUM_SEQ.size])
+  elsif (day.day_sym?)  then  to_day(day,DAY_SYM_SEQ[((DAY_SYM_SEQ.index(day))+int)%DAY_SYM_SEQ.size])
+  else  check_pre(false)
   end
 end
 
@@ -65,17 +58,14 @@ end
 # (day_num) :::: day_num -> day_sym ::
 # Tests: {[1] => :Mo; [7] => :So; [8] => Err; ["Fr"] => Err; [:Mo] => Err;}
 def day_num_to_day_sym(day)
-  num_sym(day).day_num?
-  DAY_SYM[day-1]
+  day.day_num?
+  DAY_SYM_SEQ[(DAY_NUM_SEQ.index(day))%DAY_SYM_SEQ.size]
 end
 
 # day_num_to_day_sym :: DaySym -> DayNum ::
 # (day_sym) :::: day_sym -> day_num ::
 # Tests: {[:Di] => 2; [:Sa] => 6; [:Ab] => Err; ["Fr"] => Err; [3] => Err;}
 def day_sym_to_day_num(day)
-  num_sym(day).day_sym?
-  DAY_NUM[(DAY_SYM.index(day))%DAY_SYM.size]
+  day.day_sym?
+  DAY_NUM_SEQ[(DAY_SYM_SEQ.index(day))%DAY_SYM_SEQ.size]
 end
-
-
-
