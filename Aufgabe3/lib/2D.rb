@@ -1,3 +1,6 @@
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
+require 'ext_pr1_v4'
+
 #Point2d ::= Point2d[x,y] :: Point1dxPoint1d
 def_class(:Point2d, [:x, :y]) {
   def invariant?
@@ -23,6 +26,7 @@ def_class(:Union2d, [:left, :right]) {
 }
 Union2d = U2d
 
+#Shape2d::= Range2d | Union2d
 def_class(:Shape2d, [:var]) {
   def invariant?
     shape2d?(var)
