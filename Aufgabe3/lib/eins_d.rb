@@ -15,7 +15,7 @@ def_class(:Shape1d, [:var]) {
   end
 }
 
-def range1d?(o) 
+def range1d?(o)
    o.int_range? 
 end
 

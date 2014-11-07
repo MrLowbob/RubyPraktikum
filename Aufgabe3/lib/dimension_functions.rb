@@ -13,14 +13,34 @@ def shape_include?(shape, point)
     then  shape1d_include?(shape, point)
   elsif   shape.union2d? and point.point2d?
     then  shape2d_include?(shape, point)
-  else check_pre((false))
+  else    check_pre(false)
   end
 end
 
 def shape1d_include?(shape, point)
+  if    range1d?(shape) then shape.include?(point)
+  elsif union1d?(shape) then 
+    shape1d_include?(shape.left,  point) or 
+    shape1d_include?(shape.right, point)
+  end
+end
+
+def shape2d_include?(shape2d, point2d)
   
 end
 
-def shape2d_include?(shape, point)
-  
+def trans1d(union, int)
+  check_pre((union.shape1d? and int.int?))
+  if      range1d?(union) then range_int(union, int)
+  elsif   union.union1d?  then trans1d(union.left) and trans1d(union.right)
+  else    check_pre(false)
+  end
+end
+
+def range_int(range, int)
+  (trans_p1d(range.first,int)..trans_p1d(range.last,int))
+end
+
+def trans_p1d(point, vektor)
+  point + vektor
 end
