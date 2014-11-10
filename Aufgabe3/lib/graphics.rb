@@ -146,10 +146,10 @@ end
 
 def trans2d(shape, point)
   check_pre(point.point2d?)
-  if    shape.union2d?   then  Union2d[trans2d(shape.left, point),
-                              trans2d(shape.right, point)]
-  elsif shape.range2d?   then  Range2d[trans1d(shape.x_range, point.x),
-                              trans1d(shape.y_range, point.y)]
+  if    shape.union2d?   then   Union2d[trans2d(shape.left, point),
+                                trans2d(shape.right, point)]
+  elsif shape.range2d?   then   Range2d[trans1d(shape.x_range, point.x),
+                                trans1d(shape.y_range, point.y)]
   else  check_pre(false)
   end
 end
@@ -171,4 +171,39 @@ end
 def bounding_range2d(range1, range2)
   check_pre((range1.range2d? and range2.range2d?))
   Range2d[bounding_range1d(range1.x_range, range2.x_range), bounding_range1d(range1.y_range, range2.y_range)]
+end
+###
+#Equalities
+###
+#equal_by_dim? ::= GraphObj x GraphObj -> bool
+def equal_by_dim?(graph_obj1, graph_obj2)
+  check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
+  (one_dim?(graph_obj1) and one_dim?(graph_obj1)) or (two_dim?(graph_obj1) and two_dim?(graph_obj2))
+end
+
+def one_dim?(graph_obj)
+  check_pre(graph_obj?(graph_obj))
+  point1d?(graph_obj) or shape1d?(graph_obj)
+end
+
+def two_dim?(graph_obj)
+  check_pre(graph_obj?(graph_obj))
+  graph_obj.point2d? or shape2d?(graph_obj)
+end
+
+#equal_by_tree ::= GraphObj x GraphObj -> bool
+def equal_by_tree?(graph_obj1, graph_obj2)
+  check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
+  if    (not equal_by_dim?(graph_obj1, graph_obj2))     then  false
+  elsif graph_obj1.union1d? and graph_obj2.union1d?     then  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
+                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
+  elsif (range1d?(graph_obj1) and range1d?(graph_obj2)) or
+        (point1d?(graph_obj1) and point1d?(graph_obj2)) then  (graph_obj1 == graph_obj2)
+  elsif graph_obj1.union2d? and graph_obj2.union2d?     then  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
+                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
+  elsif (graph_obj1.range2d? and graph_obj2.range2d?)   then  (graph_obj1.x_range == graph_obj2.x_range) and
+                                                              (graph_obj1.y_range == graph_obj2.y_range)
+  elsif (graph_obj1.point2d? and graph_obj2.point2d?)   then  (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
+  else  false
+  end
 end

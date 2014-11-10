@@ -137,4 +137,27 @@ class GraphicsTest < Test::Unit::TestCase
     assert_equal(2..8, bounding_range1d((2..3),(6..8)))
     assert_equal(2..8, bounding_range1d((6..8),(2..3)))
   end
+  
+  ###
+  #Equalities
+  #equal_by_dim?
+  def test_equal_by_dim?
+    assert_equal(true, equal_by_dim?(3,5))
+    assert_equal(true, equal_by_dim?((3..4),U1d[2..3, 5..7]))
+    assert_equal(true, equal_by_dim?(P2d[3,5],P2d[5,7]))
+    assert_equal(true, equal_by_dim?(R2d[3..4,5..6], U2d[R2d[5..6,5..6],R2d[1..2,2..3]]))
+    assert_equal(false, equal_by_dim?(P2d[3,5],5))
+    
+    assert_raise(RuntimeError) {equal_by_dim?("34",5)}
+  end
+  #equal_by_tree?
+  def test_equal_tree?
+    assert_equal(true, equal_by_tree?(3,3))
+    assert_equal(true, equal_by_tree?((3..5),(3..5)))
+    assert_equal(true, equal_by_tree?(U2d[R2d[3..4,3..4],R2d[5..6,5..6]],U2d[R2d[3..4,3..4],R2d[5..6,5..6]]))
+    assert_equal(false, equal_by_tree?(3..4,5..6))
+    assert_equal(false, equal_by_tree?(U1d[3..5,5..6],(3..5)))
+    assert_equal(false, equal_by_tree?(U1d[3..5,5..6],U1d[3..5,4..7]))
+    assert_equal(false, equal_by_tree?(R2d[3..5,4..5],U1d[3..4,4..5]))
+  end
 end
