@@ -65,7 +65,7 @@ def trans2d(shape, point)
 end
 
 def range_int(range, int)
-  if      range1d?(range)
+  if   range1d?(range)
     (trans_p1d(range.first,int)..trans_p1d(range.last,int))
   else check_pre(false)
   end
@@ -107,7 +107,7 @@ def bounds(shape)
   if    range1d?(shape) or shape.range2d? then shape
   elsif shape.union1d? then bounding_range(bounds(shape.left), bounds(shape.right))
   elsif shape.union2d? then bounding_range(bounds(shape.left), bounds(shape.right))
-  else check_pre(false)
+  else  check_pre(false)
   end
 end
 
@@ -157,5 +157,42 @@ def equal_by_tree?(obj1, obj2)
   end
 end
 
+#equal_by_trans? ::= GraphObj x GraphObj -> Bool
+def equal_by_trans(obj1, obj2)
+  check_pre((equal_by_dim?(obj1, obj2)))
+  check_pre((equal_by_tree?(obj1, obj2)))
+  if bounds(obj1) == bounds(obj2)
+    if dim1?(obj1)
+      min1d(obj1) + x = min1d(obj2)
+      grapho1 = translate(obj2, x)
+      obj1 == grapho1
+    elsif dim2?(obj1)
+      min2d(obj1) + x = min2d(obj2)
+      grapho1 = translate(obj2, x)
+      obj1 == grapho1
+    end
+  else false  
+  end
+end
 
-puts Union2d[Range2d[(1..3),(3..4)],Range2d[(1..3),(1..4)]] == Union2d[Range2d[(1..3),(3..4)],Range2d[(1..3),(3..4)]]
+def min1d(point)
+  if range1d?(point)
+    point.first
+  elsif point.union1d? 
+    point.left.first > point.right.first ? min1d(point.right) : min1d(point.left)
+  elsif point.int?
+    point
+  else check_pre(false)
+  end
+end
+
+def min2d(point)
+  if point.point2d?
+    point.x
+  elsif point.range2d? 
+    min1d(point.range1) > min1d(point.range2) ? min1d(point.range2) : min1d(point.range1)
+  elsif point.union2d?
+    min2d(point.left) > min2d(point.right) ? min2d(point.right) : min2d(point.left)
+  else check_pre(false)
+  end
+end
