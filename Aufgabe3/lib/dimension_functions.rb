@@ -158,21 +158,28 @@ def equal_by_tree?(obj1, obj2)
 end
 
 #equal_by_trans? ::= GraphObj x GraphObj -> Bool
-def equal_by_trans(obj1, obj2)
-  check_pre((equal_by_dim?(obj1, obj2)))
-  check_pre((equal_by_tree?(obj1, obj2)))
-  if bounds(obj1) == bounds(obj2)
-    if dim1?(obj1)
-      min1d(obj1) + x = min1d(obj2)
-      grapho1 = translate(obj2, x)
-      obj1 == grapho1
-    elsif dim2?(obj1)
-      min2d(obj1) + x = min2d(obj2)
-      grapho1 = translate(obj2, x)
-      obj1 == grapho1
-    end
-  else false  
+def equal_by_trans?(obj1, obj2)
+  if not equal_by_dim?(obj1, obj2) 
+    return false 
   end
+  
+  if not equal_by_tree?(obj1, obj2) 
+    return false 
+  end
+  
+    if dim1?(obj1)
+      if shape?(obj1) and shape?(obj2)
+        x = min1d(obj2) - min1d(obj1)  
+        obj1 == (translate(obj2, -x))
+      elsif point?(obj1) and point?(obj2)
+        true
+      else false
+      end
+    elsif dim2?(obj1)
+      p = Point2d[(min2d(obj1).x - min2d(obj2).x), (min2d(obj1).y - min2d(obj2).y)]
+      obj1 == translate(obj2, p)
+    else false
+    end
 end
 
 def min1d(point)
@@ -188,11 +195,11 @@ end
 
 def min2d(point)
   if point.point2d?
-    point.x
+    point
   elsif point.range2d? 
-    min1d(point.range1) > min1d(point.range2) ? min1d(point.range2) : min1d(point.range1)
+    Point2d[min1d(point.range1), min1d(point.range2)]
   elsif point.union2d?
-    min2d(point.left) > min2d(point.right) ? min2d(point.right) : min2d(point.left)
+    min2d(point.left) and min2d(point.right)
   else check_pre(false)
   end
 end

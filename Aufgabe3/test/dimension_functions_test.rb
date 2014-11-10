@@ -16,6 +16,10 @@ class Dimension_functions_test < Test::Unit::TestCase
     assert_equal(false, shape_include?(Range2d[(5..4),(7..8)], Point2d[5,7]))
     assert_equal(true,  shape_include?(Union2d[Range2d[(1..3),(3..4)],Union2d[Range2d[(4..5),(3..4)], Range2d[(13..14), (4..5)]]], Point2d[13,5]))
     assert_equal(false, shape_include?(Union2d[Range2d[(1..3),(3..4)],Union2d[Range2d[(4..5),(3..4)], Range2d[(13..14), (4..5)]]], Point2d[5,20]))
+    
+    assert_raise(RuntimeError) {shape_include?((1..3), (2...4))}
+    assert_raise(RuntimeError) {shape_include?((1..3), Range2d[(1..3),(3..4)])}
+    assert_raise(RuntimeError) {shape_include?(1, (2...4))}
   end
   
   def test_translate
@@ -47,5 +51,14 @@ class Dimension_functions_test < Test::Unit::TestCase
     assert_equal(true ,equal_by_tree?(Union2d[Range2d[(1..3),(3..4)], Range2d[(4..5),(3..4)]],Union2d[Range2d[(4..5),(3..4)], Range2d[(13..14), (4..5)]]))
     assert_equal(true ,equal_by_tree?(Union1d[Union1d[(1..3),(-2..7)], (4..5)], Union1d[Union1d[(1..4),(-2..7)], (4..5)] )) 
     assert_equal(true ,equal_by_tree?(Union2d[Range2d[(1..3),(3..4)], Range2d[(4..5),(3..4)]],Union2d[Range2d[(4..5),(3..4)], Range2d[(13..14), (4..5)]]))
+  end
+  
+  def test_equal_by_trans
+    assert_equal(false,equal_by_trans?(1, (3..4)))
+    assert_equal(true ,equal_by_trans?((1..10), (2..11)))
+    assert_equal(true ,equal_by_trans?((2..11), (1..10)))
+    assert_equal(true ,equal_by_trans?(1, 2))
+    assert_equal(true ,equal_by_trans?(Union2d[Range2d[(2..4),(3..4)], Range2d[(5..6),(3..4)]],Union2d[Range2d[(2..4),(3..4)], Range2d[(5..6),(3..4)]]))
+    assert_equal(false ,equal_by_trans?(Union2d[Range2d[(1..3),(3..4)], Range2d[(5..6),(3..4)]],Union2d[Range2d[(2..4),(3..4)], Range2d[(5..6),(3..4)]]))
   end
 end
