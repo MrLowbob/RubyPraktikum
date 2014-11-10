@@ -4,9 +4,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/lib/dimension_functions.rb</file>
-            <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/test/n_d_test.rb</file>
+            <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/lib/n_d.rb</file>
+            <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/test/dimension_functions_test.rb</file>
             <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/lib/zwei_d.rb</file>
-            <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/test/zwei_d_test.rb</file>
             <file>file:/C:/Users/Zujiry/Documents/Studium/Ruby/RubyPraktikum/Aufgabe3/lib/eins_d.rb</file>
         </group>
     </open-files>

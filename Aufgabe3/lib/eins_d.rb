@@ -8,13 +8,6 @@ def_class(:Union1d, [:left, :right]) {
   end
 }
 
-#Shape1d ::= Range1d | Union1d
-def_class(:Shape1d, [:var]) {
-  def invariant?
-    shape1d?(var)
-  end
-}
-
 def range1d?(o)
    o.int_range? 
 end

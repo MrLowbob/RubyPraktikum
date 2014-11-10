@@ -10,9 +10,10 @@ require 'zwei_d'
 class Zwei_d_test < Test::Unit::TestCase
   def test_point2d
     assert_equal(true, (Point2d[1,4]).point2d?)
-    assert_equal(true, (Range2d[Point2d[1,4], Point2d[5,6]]).range2d?)
-    assert_equal(true, (Union2d[Range2d[Point2d[1,4],Point2d[5,6]], Range2d[Point2d[1,9], Point2d[9,0]]]).union2d?)
-    assert_equal(true, shape2d?(Union2d[Range2d[Point2d[1,4],Point2d[5,6]], Range2d[Point2d[1,9], Point2d[9,0]]]))
+    assert_equal(true, (Range2d[(1..3),(3..9)]).range2d?)
+    assert_equal(true, (Union2d[Range2d[(1..3),(8..9)], Range2d[(5..6),(-3..5)]]).union2d?)
+    assert_equal(true, shape2d?(Union2d[Range2d[(1..3),(8..9)], Range2d[(5..6),(-3..5)]]))
+    assert_equal(true, shape2d?(Union2d[Range2d[(1..3),(8..9)], Union2d[Range2d[(1..3),(8..9)], Range2d[(5..6),(-3..5)]]]))
   end
 end
 

@@ -6,63 +6,31 @@ require 'eins_d'
 require 'zwei_d'
 
 #Point ::= Point1d | Point2d
-def_class(:Point, [:point]) {
-  def invariant?
-    point1d?(point) or point2d?(point)
-  end
-}
+def point?(o)
+  o.int? or o.point2d?
+end
 
 #PrimShape ::= Range1d | Range2d
-def_class(:PrimShape, [:range]) {
-  def invariant?
-    range1d?(range) or range2d?(range)
+def primshape?(o)
+    range1d?(o) or o.range2d?
   end
-}
 
 #UnionShape::= Union1d | Union2d
-def_class(:UnionShape, [:union]) {
-  def invariant?
-    union1d?(union) or union2d?(union)
+def unionshape?(o)
+    o.union1d? or o.union2d?
   end
-}
 
-#CompShape::= UnionShape
-def_class(:CompShape, [:unionshape]) {
-  def invariant?
-    unionshape?(unionshape)
+#CompShape ::= UnionShape
+def compshape?(o)
+    unionshape?(o)
   end
-}
-
-#Shape::= PrimShape|CompShape
-def_class(:Shape, [:pcshape]) {
-  def invariant?
-    primshape?(pcshape) or compshape?(pcshape)
-  end
-}
 
 #GraphObj::= Point | Shape
-def_class(:GraphObj, [:poshap]) {
-  def invariant?
-    point?(poshap) or shape?(poshap)
+def graphobj?(o)
+    point?(o) or shape?(o)
   end
-}
 
-def unionshape?(o)
-  o.union_shape?
-end
-
-def primshape?(o)
-  o.prim_shape?
-end
-
-def comshape?(o)
-  o.comp_shape?
-end
-
-def point?(o)
-  o.point?
-end
-
+#Shape::= PrimShape|CompShape
 def shape?(o)
-  o.shape?
+    primshape?(o) or compshape?(o)
 end
