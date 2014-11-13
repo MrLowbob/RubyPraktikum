@@ -182,12 +182,10 @@ def equal_by_dim?(graph_obj1, graph_obj2)
 end
 
 def one_dim?(graph_obj)
-  check_pre(graph_obj?(graph_obj))
   point1d?(graph_obj) or shape1d?(graph_obj)
 end
 
 def two_dim?(graph_obj)
-  check_pre(graph_obj?(graph_obj))
   graph_obj.point2d? or shape2d?(graph_obj)
 end
 
@@ -197,13 +195,50 @@ def equal_by_tree?(graph_obj1, graph_obj2)
   if    (not equal_by_dim?(graph_obj1, graph_obj2))     then  false
   elsif graph_obj1.union1d? and graph_obj2.union1d?     then  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
                                                               equal_by_tree?(graph_obj1.right, graph_obj2.right)
-  elsif (range1d?(graph_obj1) and range1d?(graph_obj2)) or
-        (point1d?(graph_obj1) and point1d?(graph_obj2)) then  (graph_obj1 == graph_obj2)
+# elsif (range1d?(graph_obj1) and range1d?(graph_obj2)) or
+#       (point1d?(graph_obj1) and point1d?(graph_obj2)) then  (graph_obj1 == graph_obj2)
   elsif graph_obj1.union2d? and graph_obj2.union2d?     then  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
                                                               equal_by_tree?(graph_obj1.right, graph_obj2.right)
-  elsif (graph_obj1.range2d? and graph_obj2.range2d?)   then  (graph_obj1.x_range == graph_obj2.x_range) and
-                                                              (graph_obj1.y_range == graph_obj2.y_range)
-  elsif (graph_obj1.point2d? and graph_obj2.point2d?)   then  (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
+  elsif (graph_obj1.range2d? and graph_obj2.range2d?)   or 
+        (graph_obj1.point2d? and graph_obj2.point2d?)   or
+        (range1d?(graph_obj1) and range1d?(graph_obj2)) or
+        (point1d?(graph_obj1) and point1d?(graph_obj2)) then  true
+                                                              
+#                                                             (graph_obj1.x_range == graph_obj2.x_range) and
+#                                                             (graph_obj1.y_range == graph_obj2.y_range)
+# elsif (graph_obj1.point2d? and graph_obj2.point2d?)   then  (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
   else  false
   end
 end
+
+#equal_by_trans? ::= OraphObj x GraphObj -> bool
+def equal_by_trans?(graph_obj1, graph_obj2)
+  check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
+  bounds_obj1 = bounds(graph_obj1)
+  bounds_obj2 = bounds(graph_obj2)
+  if    (not (bounds_obj1.size == bounds_obj2.size)) #or (not equal_by_dim?(graph_obj1, graph_obj2))
+                false
+  elsif one_dim?(graph_obj1) and one_dim?(graph_obj2)
+                translate(graph_obj1, -(bounds_obj1.first - bounds_obj2.first)) == graph_obj2
+                #equal_by_tree?(translate(graph_obj1, -(bounds_obj1.first - bounds_obj2.first)), graph_obj2)
+  elsif two_dim?(graph_obj1) and two_dim?(graph_obj2)
+                translate(graph_obj1, Point2d[-(bounds_obj1.x_range.first - bounds_obj2.x_range.first),
+                -(bounds_obj1.y_range.first - bounds_obj2.y_range.first)]) == graph_obj2
+                #equal_by_tree?(translate(graph_obj1, Point2d[-(bounds_obj1.x_range.first - bounds_obj2.x_range.first),   
+                #-(bounds(graph_obj1).y_range.first - bounds(graph_obj2).y_range.first)]), graph_obj2)
+  else          false
+  end
+end
+
+#def to_array(obj)
+#  if point1d?(obj) then  obj.to_a
+#  elsif range1d?(obj) then  obj.to_a
+#  elsif obj.union1d?  then  (to_array(obj.left) | to_array(obj.right))
+#  end
+#end
+#
+#print to_array(1..3)
+#puts
+#print to_array(Union1d[1..3,Union1d[8..10,4..6]])
+
+
