@@ -50,7 +50,7 @@ def trans1d(shape, point)
   if      range1d?(shape)
     range_int(shape, point)
   elsif   shape.union1d? 
-    Union1d[trans1d(shape.left), trans1d(shape.right)]
+    Union1d[trans1d(shape.left, point), trans1d(shape.right, point)]
   else    check_pre(false)
   end
 end
@@ -128,52 +128,37 @@ end
 #equal_by_tree? ::= GraphObj x GraphObj -> Bool
 def equal_by_tree?(obj1, obj2)
   check_pre((equal_by_dim?(obj1, obj2)))
-  if dim1?(obj1) 
-    if    obj1 == obj2
-      true
-    elsif obj1.int? and obj2.int?
-      true
-    elsif obj1.union1d? and obj2.union1d?
+  if obj1 == obj2 then true
+  elsif dim1?(obj1) 
+    if obj1.union1d? and obj2.union1d?
       equal_by_tree?(obj1.left, obj2.left) and equal_by_tree?(obj1.right, obj2.right)
-    elsif range1d?(obj1) and range1d?(obj2)
-      true
+    elsif range1d?(obj1) and range1d?(obj2) then true
+    elsif obj1.int? and obj2.int? then true
     else  false  
     end
     
   elsif dim2?(obj1)
-     if    obj1 == obj2
-      true
-    elsif obj1.union2d? and obj2.union2d?
+    if obj1.union2d? and obj2.union2d?
       equal_by_tree?(obj1.left, obj2.left) and 
       equal_by_tree?(obj1.right, obj2.right)
-    elsif obj1.range2d? and obj2.range2d?
-      equal_by_tree?(obj1.range1, obj2.range1) and 
-      equal_by_tree?(obj1.range2, obj2.range2)
-    elsif obj1.point2d? and obj2.point2d?
-      true
+    elsif obj1.range2d? and obj2.range2d? then true
+    elsif obj1.point2d? and obj2.point2d? then true
     else  false  
     end
-  else check_pre(false)  
+  else false 
   end
 end
 
 #equal_by_trans? ::= GraphObj x GraphObj -> Bool
 def equal_by_trans?(obj1, obj2)
-  if not equal_by_dim?(obj1, obj2) 
-    return false 
-  end
-  
-  if not equal_by_tree?(obj1, obj2) 
+  if not equal_by_dim?(obj1, obj2) and not equal_by_tree?(obj1, obj2) 
     return false 
   end
   
     if dim1?(obj1)
-      if shape?(obj1) and shape?(obj2)
-        x = min1d(obj2) - min1d(obj1)  
-        obj1 == (translate(obj2, -x))
-      elsif point?(obj1) and point?(obj2)
-        true
-      else false
+      if    shape?(obj1) and shape?(obj2) then obj1 == (translate(obj2, (min1d(obj1) - min1d(obj2))))
+      elsif point?(obj1) and point?(obj2) then true
+      else  false
       end
     elsif dim2?(obj1)
       p = Point2d[(min2d(obj1).x - min2d(obj2).x), (min2d(obj1).y - min2d(obj2).y)]
@@ -186,7 +171,10 @@ def min1d(point)
   if range1d?(point)
     point.first
   elsif point.union1d? 
-    point.left.first > point.right.first ? min1d(point.right) : min1d(point.left)
+    if      range1d?(point.left)  then point.left.first
+    elsif   range1d?(point.right) then point.right.first
+    elsif   (point.left).union1d? then min1d(point.left)
+    end 
   elsif point.int?
     point
   else check_pre(false)
