@@ -98,10 +98,10 @@ end
 #shape_include? ::= (shape, point) :: Shape x Point ->? bool :: same dimensional objects
 def shape_include?(shape, point)
   check_pre((graph_obj?(shape) and graph_obj?(point) and equal_by_dim?(shape, point)))
-  if    shape.union1d? or shape.union2d? then shape_include?(shape.left, point) or
+  if    union_shape?(shape) then              shape_include?(shape.left, point) or
                                               shape_include?(shape.right, point)
-  elsif range1d?(shape) then                  point.in?(shape)
-  elsif shape.range2d?  then                  shape_include?(shape.x_range, point.x) and
+  elsif range1d?(shape)     then              point.in?(shape)
+  elsif shape.range2d?      then              shape_include?(shape.x_range, point.x) and
                                               shape_include?(shape.y_range, point.y)
   else  check_pre(false)
   end
@@ -110,7 +110,7 @@ end
 #translate ::= (shape, point) :: Shape x Point ->? Shape :: same dimension of given Objects
 def translate(graph_obj, point)
   check_pre((graph_obj?(graph_obj) and point?(point) and equal_by_dim?(graph_obj, point)))
-  if    graph_obj.union1d? or graph_obj.union2d?  then  graph_obj.class[translate(graph_obj.left, point),
+  if    union_shape?(graph_obj)                   then  graph_obj.class[translate(graph_obj.left, point),
                                                         translate(graph_obj.right, point)]
   elsif range1d?(graph_obj)                       then  (translate(graph_obj.first, point)..translate(graph_obj.last, point))
   elsif graph_obj.range2d?                        then  Range2d[translate(graph_obj.x_range, point.x),
