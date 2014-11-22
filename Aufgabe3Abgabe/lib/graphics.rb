@@ -102,7 +102,7 @@ def shape_include?(shape, point)
   elsif   shape.range2d?   then shape_include?(shape.x_range, point.x) or 
                                 shape_include?(shape.y_range, point.y)
   elsif   union_shape?(shape)  then shape_include?(shape.left, point) or
-                                shape_include?(shape.right, point)
+                                    shape_include?(shape.right, point)
   else    check_pre(false)
   end
 end
@@ -113,12 +113,10 @@ end
 def translate(shape, point)
   check_pre((equal_by_dim?(shape, point) and graph_obj?(shape) and graph_obj?(point)))
   if      range1d?(shape) then (shape.first + point)..(shape.last + point)
-  elsif   shape.union1d?  then Union1d[translate(shape.left, point),
+  elsif   union_shape?(shape)  then shape.class[translate(shape.left, point),
                                 translate(shape.right, point)]
   elsif   shape.range2d?  then Range2d[translate(shape.x_range, point.x),
                                 translate(shape.y_range, point.y)]     
-  elsif   shape.union2d?  then Union2d[translate(shape.left, point),
-                                translate(shape.right, point)]
   else    check_pre(false)
   end
 end
@@ -147,16 +145,21 @@ end
 ###
 
 
-CLASS_TO_DIM = {Integer => 1,Range => 1,Range2d => 2}
+CLASS_TO_DIM = {Fixnum => 1,
+                Range => 1,
+                Union1d => 1,
+                Point2d => 2,
+                Range2d => 2,
+                Union2d => 2
+                }
 
-def dim(o)  CLASS_TO_DIM[o.class] end 
+def dim(o) CLASS_TO_DIM[o.class] end 
 
 
 #equal_by_dim? ::= GraphObj x GraphObj -> bool
 def equal_by_dim?(graph_obj1, graph_obj2)
   check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
-   ((point1d?(graph_obj1) or shape1d?(graph_obj1)) and (point1d?(graph_obj2) or shape1d?(graph_obj2))) or
-   ((graph_obj1.point2d? or shape2d?(graph_obj1))  and (graph_obj2.point2d? or shape2d?(graph_obj2)))
+  dim(graph_obj1) == dim(graph_obj2)
 end
 
 #equal_by_tree? ::= GraphObj x GraphObj -> bool
@@ -177,7 +180,7 @@ def equal_by_trans?(graph_obj1, graph_obj2)
 end
 
 def shift(obj1, obj2)
-  check_pre((equal_by_dim?(obj1,obj2) and graph_obj?(obj1) and graph_obj?(obj2)))
+  check_pre((graph_obj?(obj1) and graph_obj?(obj2)))
   if      shape1d?(obj1) then obj2.first - obj1.first
   elsif   shape2d?(obj1) then Point2d[obj2.x_range.first - obj1.x_range.first,
                                       obj2.y_range.first - obj1.y_range.first]
@@ -223,15 +226,13 @@ end
 ##  if    (not equal_by_dim?(graph_obj1, graph_obj2))     then  false
 ##  elsif graph_obj1.union1d?                             then  graph_obj2.union1d? and  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
 ##                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
-##  elsif graph_obj1.union2d? and graph_obj2.union2d?     then  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
+##  elsif graph_obj1.union2d?                             then  graph_obj2.union2d? and equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
 ##                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
-##  elsif (graph_obj1.range2d? and graph_obj2.range2d?)   or 
-##        (graph_obj1.point2d? and graph_obj2.point2d?)   or
-##        (range1d?(graph_obj1) and range1d?(graph_obj2)) or
-##        (point1d?(graph_obj1) and point1d?(graph_obj2)) then  true                                          
-###                                                             (graph_obj1.x_range == graph_obj2.x_range) and
-###                                                             (graph_obj1.y_range == graph_obj2.y_range)
-### elsif (graph_obj1.point2d? and graph_obj2.point2d?)   then  (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
-##  else  false
+##  elsif (graph_obj1.range2d? then graph_obj2.range2d? and (graph_obj1.x_range == graph_obj2.x_range) and
+###                                                         (graph_obj1.y_range == graph_obj2.y_range)
+##  elsif (graph_obj1.point2d? then graph_obj2.point2d? and (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
+##  elsif (range1d?(graph_obj1)then range1d?(graph_obj2)) then true
+##  elsif (point1d?(graph_obj1)then point1d?(graph_obj2)) then  true                                          
+### else false
 ##  end
 #end

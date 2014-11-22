@@ -79,7 +79,7 @@ def to_day_index(day)
 end
 
 
-
+puts day_shift(DaySym[:Mo], 1000)
 
 
 
