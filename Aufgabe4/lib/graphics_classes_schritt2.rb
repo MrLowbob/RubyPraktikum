@@ -119,7 +119,7 @@ class Union1d
   end
   
   def left() @left end
-  def right() @ight end
+  def right() @right end
   def self.[](*args); check_inv(self.new(*args)) end
   def invariant?() shape1d?(left) and shape1d?(right) end
   def to_s() "#{self.class.name}[#{self.left.to_s},#{self.right.to_s}]" end
@@ -163,11 +163,7 @@ class Union1d
   
   def shift(obj)
    check_pre((self.equal_by_dim?(obj)))
-   P1D[(self.first.shift(obj.first)).x]
-  end
-  
-  def shape1d?(o)
-  o.union1d? or o.range1d?
+   P1D[(self.bounds.first.shift(obj.bounds.first)).x]
   end
 end
 
@@ -181,10 +177,19 @@ end
 ##
 
 #Point2d ::= Point1d x Point1d
-def_class(:Point2d,[:x, :y]) {
-  def invariant? 
-    x.point1d? and y.point1d?
+class Point2d
+  def initialize(x,y)
+    @x = x
+    @y = y
   end
+  
+  def x() @x end
+  def y() @y end
+  def point2d?() true end
+  def invariant?() x.point1d? and y.point1d? end
+  def self.[](*args); check_inv(self.new(*args)) end
+  def ==(o) self.equal?(o) or (o.point2d? and self.x == o.x and self.y == o.y) end
+  def to_s() "#{self.class.name}[#{self.x},#{self.y}]" end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -221,12 +226,22 @@ def_class(:Point2d,[:x, :y]) {
    check_pre((self.equal_by_dim?(point) and point.point2d?))
    P2D[P1D[self.x.x - point.x.x],P1D[self.y.x - point.y.x]]
   end
-}
+end
+
 #Range2d ::= Range2d[x_range, y_range] :: Range1d x Range1d
-def_class(:Range2d,[:x_range, :y_range]){
-  def invariant?
-    x_range.range1d? and y_range.range1d?
+class Range2d
+  def initialize(x_range,y_range)
+    @x_range = x_range
+    @y_range = y_range
   end
+  
+  def x_range() @x_range end
+  def y_range() @y_range end
+  def range2d?() true end 
+  def self.[](*args); check_inv(self.new(*args)) end
+  def ==(o) self.equal?(o) or (o.range2d? and self.x_range == o.x_range and self.y_range == o.y_range) end
+  def to_s() "#{self.class.name}[#{self.x_range},#{self.y_range}]" end
+  def invariant?() x_range.range1d? and y_range.range1d? end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -264,13 +279,22 @@ def_class(:Range2d,[:x_range, :y_range]){
    check_pre((self.equal_by_dim?(point)))
    Point2d[self.x_range.shift(point.x_range), self.y_range.shift(point.y_range)]
   end
-}
+end
 
 #Union2d ::= Union2d[left, right] :: Shape2d x Shape2d
-def_class(:Union2d,[:left, :right]){
-  def invariant?
-    shape2d?(left) and shape2d?(right)
+class Union2d
+  def initialize(left,right)
+    @left = left
+    @right = right
   end
+  
+  def left() @left end
+  def right() @right end
+  def union2d?() true end
+  def self.[](*args); check_inv(self.new(*args)) end
+  def ==(o) self.equal?(o) or (o.union2d? and self.left == o.left and self.right == o.right) end
+  def to_s() "#{self.class.name}[#{self.x_range},#{self.y_range}]" end
+  def invariant?() shape2d?(left) and shape2d?(right) end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -311,7 +335,7 @@ def_class(:Union2d,[:left, :right]){
    check_pre((self.equal_by_dim?(point)))
    Point2d[self.bounds.x_range.shift(point.bounds.x_range), self.bounds.y_range.shift(point.bounds.y_range)]
   end
-}
+end
 
 #Shape2d ::= Range2d | Union2d
 def shape2d?(o)
