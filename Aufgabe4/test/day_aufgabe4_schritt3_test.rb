@@ -77,6 +77,17 @@ class DayTest < Test::Unit::TestCase
     assert_raise(RuntimeError) {DS[:AB].day_shift(5)}
   end
   
+  def test_values
+    assert_equal([:Mo, :Di, :Mi, :Do, :Fr, :Sa, :So],DS[:Fr].values())
+  end
+  
+  def test_to_day_x
+    assert_equal(DS[:Fr], DN[5].to_day_sym)
+    assert_equal(DS[:Fr], DI[4].to_day_sym)
+    assert_equal(DS[:Mo], DN[1].to_day_sym)
+    assert_equal(DS[:Mo], DI[0].to_day_sym)
+  end
+  
   def test_add_succ_pred
     #Test +
     assert_equal(DS[:Fr], DS[:Mo] + 4)
