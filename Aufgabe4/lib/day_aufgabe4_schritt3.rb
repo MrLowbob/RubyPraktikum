@@ -35,14 +35,14 @@ class Day
   def self.[](*args)    check_inv(self.new(*args))  end
   
   #Conversions
-  def to_s()            self.class.name + "[" + value.to_s + "]"              end
-  def to_day_index()    DayIndex[DayIndex.values[self.values.index(value)]]   end
-  def to_day_num()      DayNum[DayNum.values[self.values.index(value)]]       end
-  def to_day_sym()      DaySym[DaySym.values[self.values.index(value)]]       end #Refaktorisierung?
+  def to_s()            self.class.name + "[" + value.to_s + "]"  end
   def to_day(proto_day)
     check_pre proto_day.day?
-    proto_day.class[proto_day.values[self.values.index(value)]]
+    proto_day.values_seq[self.values.index(value)]
   end
+  def to_day_index()    self.to_day(DayIndex[0])  end
+  def to_day_num()      self.to_day(DayNum[1])    end #nicht sonderlich schön -.-
+  def to_day_sym()      self.to_day(DaySym[:Mo])  end #Refaktorisierung?
  
   #Operations
   def succ()            self + 1  end
@@ -99,7 +99,6 @@ class Object
   def day_sym?()    false end
   def day_index?()  false end
 end
-
 
 #### Kommentare zu anderem
 #GraObj 
