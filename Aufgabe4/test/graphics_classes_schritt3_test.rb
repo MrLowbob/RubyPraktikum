@@ -50,10 +50,10 @@ class Graphics_classes_test < Test::Unit::TestCase
     assert_equal(P1D[2], P1D[2].bounds)
     assert_equal(R1D[P1D[3],P1D[7]], R1D[P1D[3],P1D[7]].bounds)
     assert_equal(R1D[P1D[2],P1D[5]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[4], P1D[5]]].bounds)
-    assert_equal(R1D[P1D[1],P1D[19]], U1D[R1D[P1D[1], P1D[3]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[13], P1D[19]]]].bounds)
+    assert_equal(R1D[P1D[1],P1D[19]],U1D[R1D[P1D[1], P1D[3]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[13], P1D[19]]]].bounds)
     
     #2D
-    assert_equal(R2D[R1D[P1D[3],P1D[10]], R1D[P1D[9],P1D[16]]], U2D[ R2D[R1D[P1D[3],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[3],P1D[10]],R1D[P1D[9],P1D[16]]]].bounds)
+    assert_equal(R2D[R1D[P1D[1],P1D[10]], R1D[P1D[9],P1D[16]]], U2D[ R2D[R1D[P1D[3],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[3],P1D[10]],R1D[P1D[9],P1D[16]]]].bounds)
     assert_equal(R2D[R1D[P1D[1],P1D[10]], R1D[P1D[4],P1D[25]]], U2D[ R2D[R1D[P1D[3],P1D[10]],R1D[P1D[11],P1D[16]]],U2D[ R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]]].bounds)
   end
   
