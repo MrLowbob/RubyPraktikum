@@ -1,11 +1,6 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
 require 'ext_pr1_v4'
 
-#1D
-
-# Translate == Shift
-
-
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
 require 'ext_pr1_v4'
 ##
@@ -376,11 +371,8 @@ def graph_obj?(o)
   point?(o) or shape?(o)
 end
 
-# shape.class[translate....]
-#bounds ::= (shape) :: Shape x-> (Range1d | Range2d)
-
 ###
-#Equalities
+#Class_To_Dim
 ###
 
 CLASS_TO_DIM = {Point1d => 1,
@@ -393,6 +385,10 @@ CLASS_TO_DIM = {Point1d => 1,
 
 def dim(o) CLASS_TO_DIM[o.class] end 
 
+###
+#Object
+###
+
 class Object
   def point1d?() false end
   def range1d?() false end
@@ -401,6 +397,18 @@ class Object
   def range2d?() false end
   def union2d?() false end
 end
+
+
+
+
+
+
+
+
+
+
+
+
 
 #equal_by_dim? ::= GraphObj x GraphObj -> bool
 
