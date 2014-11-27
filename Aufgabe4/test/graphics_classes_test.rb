@@ -18,15 +18,12 @@ class Graphics_classes_test < Test::Unit::TestCase
   def test_shape_include?
     #1D
     assert_equal(true, U1D[R1D[P1D[1],P1D[3]],R1D[P1D[5],P1D[7]]].shape_include?(P1D[2]))
-    assert_equal(false,P1D[2].shape_include?(P1D[3]))
     assert_equal(true, R1D[P1D[2],P1D[4]].shape_include?(P1D[3]))
     
     #2D
     assert_equal(true, R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]].shape_include?(P2D[P1D[3],P1D[5]]))
     assert_equal(false, R2D[R1D[P1D[3],P1D[8]],R1D[P1D[8],P1D[3]]].shape_include?(P2D[P1D[3],P1D[76]]))
-    
-    assert_equal(true, P2D[P1D[4], P1D[5]].shape_include?(P2D[P1D[4], P1D[5]]))
-    assert_equal(false, P2D[P1D[4], P1D[5]].shape_include?(P2D[P1D[4], P1D[7]]))
+
     assert_equal(true, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[15],P1D[20]],R1D[P1D[30],P1D[31]]]].shape_include?(P2D[P1D[16],P1D[30]]))
     assert_equal(false, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[15],P1D[20]],R1D[P1D[30],P1D[31]]]].shape_include?(P2D[P1D[14],P1D[30]]))
     assert_equal(true, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[4],P1D[401]],R1D[P1D[30],P1D[31]]]]].shape_include?(P2D[P1D[14],P1D[30]]))
@@ -47,7 +44,6 @@ class Graphics_classes_test < Test::Unit::TestCase
     
   def test_bounds
     #1D
-    assert_equal(P1D[2], P1D[2].bounds)
     assert_equal(R1D[P1D[3],P1D[7]], R1D[P1D[3],P1D[7]].bounds)
     assert_equal(R1D[P1D[2], P1D[5]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[4], P1D[5]]].bounds)
     assert_equal(R1D[P1D[1], P1D[19]], U1D[R1D[P1D[1], P1D[3]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[13], P1D[19]]]].bounds)

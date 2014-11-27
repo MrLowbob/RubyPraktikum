@@ -14,17 +14,11 @@ def_class(:Point1d, [:x]) {
     x.int?
   end
   
-  def shape_include?(point)
-    check_pre(point.point1d?)
-    point == self
-  end
+  def graph_obj?()    true  end
+  def point?()        true  end
   
   def translate(point)
     Point1d[self.x + point.x]
-  end
-  
-  def bounds
-    self
   end
   
   def equal_by_dim?(obj1d)
@@ -53,6 +47,11 @@ def_class(:Range1d, [:first, :last]) {
   def invariant?
     first.point1d? and last.point1d?
   end
+  
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape1d?()      true  end
+  def prim_shape?()   true  end
   
   def shape_include?(point)
     check_pre(point.point1d?)
@@ -94,8 +93,14 @@ def_class(:Range1d, [:first, :last]) {
 #Union1d ::= Union1d[left, right] :: shape1d x shape1d
 def_class(:Union1d, [:left, :right]) {
   def invariant?
-    shape1d?(left) and shape1d?(right)
+    left.shape1d? and right.shape1d?
   end
+  
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape1d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
   
   def shape_include?(point)
     check_pre(point.point1d?)
@@ -138,10 +143,7 @@ def_class(:Union1d, [:left, :right]) {
   end
 }
 
-#Shape1d ::= Range1d | Union1d
-def shape1d?(o)
-  o.union1d? or o.range1d?
-end
+
 
 ##
 # 2-Dimensional graphics
@@ -153,18 +155,12 @@ def_class(:Point2d,[:x, :y]) {
     x.point1d? and y.point1d?
   end
   
-  def shape_include?(point)
-    check_pre(point.point2d?)
-    self == point
-  end
+  def graph_obj?()    true  end
+  def point?()        true  end
   
   def translate(point)
     check_pre(point.point2d?)
     Point2d[x.translate(point.x), y.translate(point.y)]
-  end
-  
-  def bounds
-    self
   end
   
   def equal_by_dim?(obj1d)
@@ -194,6 +190,11 @@ def_class(:Range2d,[:x_range, :y_range]){
   def invariant?
     x_range.range1d? and y_range.range1d?
   end
+  
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape2d?()      true  end
+  def prim_shape?()   true  end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -236,8 +237,14 @@ def_class(:Range2d,[:x_range, :y_range]){
 #Union2d ::= Union2d[left, right] :: Shape2d x Shape2d
 def_class(:Union2d,[:left, :right]){
   def invariant?
-    shape2d?(left) and shape2d?(right)
+    left.shape2d? and right.shape2d?
   end
+  
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape2d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -280,51 +287,7 @@ def_class(:Union2d,[:left, :right]){
   end
 }
 
-#Shape2d ::= Range2d | Union2d
-def shape2d?(o)
-  o.range2d? or o.union2d?
-end
 
-##
-# Dimensionsunabhängig
-##
-
-#Point ::= point1d | point2d
-def point?(o)
-  point1d?(o) or o.point2d?
-end
-
-#PrimShape ::= Range1d | Range2d
-def prim_shape?(o)
-  range1d?(o) or o.range2d?
-end
-
-#UnionShape ::= Union1d | Union2d
-def union_shape?(o)
-  o.union1d? or o.union2d?
-end
-
-#CompShape? ::= UnionShape
-def comp_shape?(o)
-  union_shape?(o)
-end
-
-#Shape? ::= PrimShape | CompShape
-def shape?(o)
-  prim_shape?(o) or comp_shape?(o)
-end
-
-#Graphobj ::= Point | Shape
-def graph_obj?(o)
-  point?(o) or shape?(o)
-end
-
-# shape.class[translate....]
-#bounds ::= (shape) :: Shape x-> (Range1d | Range2d)
-
-###
-#Equalities
-###
 
 CLASS_TO_DIM = {Point1d => 1,
   Range1d => 1,
@@ -336,65 +299,22 @@ CLASS_TO_DIM = {Point1d => 1,
 
 def dim(o) CLASS_TO_DIM[o.class] end 
 
-#equal_by_dim? ::= GraphObj x GraphObj -> bool
 
-#equal_by_tree? ::= GraphObj x GraphObj -> bool
-
-# equal_by_tree(translate(o1,norm_shift(bounds(o1,o1),translate(o1,norm_shift(bounds(o1),o1)))
-# equal_by_tree(translate(o1,shift(bounds(o1),bounds(o2)),o2))
-
-
-def equal_by_trans?(graph_obj1, graph_obj2)
-  check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
-  if not equal_by_dim?(graph_obj1, graph_obj2) then false
-  else equal_by_tree?(translate(graph_obj1, shift(bounds(graph_obj1), bounds(graph_obj2))), graph_obj2)
-  end
+#Point ::= point1d | point2d
+#Shape1d ::= Range1d | Union1d
+#Shape2d ::= Range2d | Union2d
+#PrimShape ::= Range1d | Range2d
+#UnionShape ::= Union1d | Union2d
+#CompShape? ::= UnionShape
+#Shape? ::= PrimShape | CompShape
+#Graphobj ::= Point | Shape
+class Object
+  def point?()        false end
+  def shape1d?()      false end
+  def shape2d?()      false end
+  def shape?()        false end
+  def prim_shape?()   false end
+  def union_shape?()  false end
+  def comp_shape?()   false end
+  def graph_obj?()    false end
 end
-
-
-#equal_by_trans? ::= OraphObj x GraphObj -> bool
-#def equal_by_trans?(graph_obj1, graph_obj2)
-#  check_pre((equal_by_dim?(graph_obj1,graph_obj2) and graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
-#  bounds_obj1 = bounds(graph_obj1)
-#  bounds_obj2 = bounds(graph_obj2)
-#  if    (not (bounds_obj1.size == bounds_obj2.size)) #or (not equal_by_dim?(graph_obj1, graph_obj2))
-#                false
-#  elsif         shape1d?(graph_obj1) and shape1d?(graph_obj2) 
-#                translate(graph_obj1, -(bounds_obj1.first - bounds_obj2.first)) == graph_obj2
-#                #equal_by_tree?(translate(graph_obj1, -(bounds_obj1.first - bounds_obj2.first)), graph_obj2)
-#  elsif         shape2d?(graph_obj1) and shape2d?(graph_obj2)
-#                translate(graph_obj1, Point2d[-(bounds_obj1.x_range.first - bounds_obj2.x_range.first),
-#                -(bounds_obj1.y_range.first - bounds_obj2.y_range.first)]) == graph_obj2
-#                #equal_by_tree?(translate(graph_obj1, Point2d[-(bounds_obj1.x_range.first - bounds_obj2.x_range.first),   
-#                #-(bounds(graph_obj1).y_range.first - bounds(graph_obj2).y_range.first)]), graph_obj2)
-#  else          false
-#  end
-#end
-
-#def to_array(obj)
-#  if point1d?(obj) then  obj.to_a
-#  elsif range1d?(obj) then  obj.to_a
-#  elsif obj.union1d?  then  (to_array(obj.left) | to_array(obj.right))
-#  end
-#end
-#
-#print to_array(1..3)
-#puts
-#print to_array(Union1d[1..3,Union1d[8..10,4..6]])
-
-#equal_by_tree? ::= GraphObj x GraphObj -> bool // das hier ist die rekursive idee
-#def equal_by_tree?(graph_obj1, graph_obj2)
-#  check_pre((graph_obj?(graph_obj1) and graph_obj?(graph_obj2)))
-##  if    (not equal_by_dim?(graph_obj1, graph_obj2))     then  false
-##  elsif graph_obj1.union1d?                             then  graph_obj2.union1d? and  equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
-##                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
-##  elsif graph_obj1.union2d?                             then  graph_obj2.union2d? and equal_by_tree?(graph_obj1.left, graph_obj2.left) and 
-##                                                              equal_by_tree?(graph_obj1.right, graph_obj2.right)
-##  elsif (graph_obj1.range2d? then graph_obj2.range2d? and (graph_obj1.x_range == graph_obj2.x_range) and
-###                                                         (graph_obj1.y_range == graph_obj2.y_range)
-##  elsif (graph_obj1.point2d? then graph_obj2.point2d? and (graph_obj1.x == graph_obj2.x) and (graph_obj1.y == graph_obj2.y)
-##  elsif (range1d?(graph_obj1)then range1d?(graph_obj2)) then true
-##  elsif (point1d?(graph_obj1)then point1d?(graph_obj2)) then  true                                          
-### else false
-##  end
-#end

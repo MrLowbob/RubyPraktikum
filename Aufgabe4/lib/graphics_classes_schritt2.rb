@@ -1,8 +1,6 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
 require 'ext_pr1_v4'
 
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__),'../..','ext_pr1/lib')
-require 'ext_pr1_v4'
 ##
 # 1-Dimensional graphics
 ##
@@ -14,25 +12,18 @@ class Point1d
     @x = x
   end
   
-  #attr_reader :radius 
-  def x() @x end
-  def self.[](*args); check_inv(self.new(*args)) end
-  def invariant?() x.int? end
-  def point1d?() true end
-  def ==(o) self.equal?(o) or (o.point1d? and (self.x == o.x)) end
-  def to_s() "#{self.class.name}[#{self.x.to_s}]" end
+  def graph_obj?()    true  end
+  def point?()        true  end
+  def point1d?()      true  end
   
-  def shape_include?(point)
-    check_pre(point.point1d?)
-    point == self
-  end
+  def x() @x end
+  def self.[](*args)  check_inv(self.new(*args))                          end
+  def invariant?()    x.int?                                              end
+  def ==(o)           self.equal?(o) or (o.point1d? and (self.x == o.x))  end
+  def to_s()          "#{self.class.name}[#{self.x.to_s}]"                end
   
   def translate(point)
     Point1d[self.x + point.x]
-  end
-  
-  def bounds
-    self
   end
   
   def equal_by_dim?(obj1d)
@@ -44,10 +35,7 @@ class Point1d
   end
   
   def equal_by_trans?(obj)
-     if     not self.equal_by_dim?(obj) then false
-     elsif  not obj.point1d? then false
-     else   true
-     end
+     self.equal_by_dim?(obj) and obj.point1d?
   end 
 
   def shift(obj)
@@ -63,6 +51,12 @@ class Range1d
     @last = last
   end
   
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape1d?()      true  end
+  def prim_shape?()   true  end
+  def range1d?()      true  end
+  
   def first() @first end
   def last() @last end
   def self.[](*args)          #* => variable argumente, new => baut neues argument
@@ -71,7 +65,6 @@ class Range1d
   end
   def ==(o) self.equal?(o) or (o.range1d? and (self.first == o.first) and (self.last == o.last)) end
   def invariant?() first.point1d? and last.point1d? end
-  def range1d?() true end
   def to_s() "#{self.class.name}[#{self.first.to_s},#{self.last.to_s}]" end
   
   def shape_include?(point)
@@ -113,13 +106,19 @@ class Union1d
     @right = right
   end
   
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape1d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
+  def union1d?()      true  end
+  
   def left() @left end
   def right() @right end
   def self.[](*args); check_inv(self.new(*args)) end
-  def invariant?() shape1d?(left) and shape1d?(right) end
+  def invariant?() left.shape1d? and right.shape1d? end
   def to_s() "#{self.class.name}[#{self.left.to_s},#{self.right.to_s}]" end
   def ==(o) self.equal?(o) or (o.union1d? and (o.left == self.left) and (self.right ==  o.right)) end
-  def union1d?() true end
   
   def shape_include?(point)
     check_pre(point.point1d?)
@@ -162,15 +161,6 @@ class Union1d
   end
 end
 
-#Shape1d ::= Range1d | Union1d
-def shape1d?(o)
-  o.union1d? or o.range1d?
-end
-
-##
-# 2-Dimensional graphics
-##
-
 #Point2d ::= Point1d x Point1d
 class Point2d
   def initialize(x,y)
@@ -178,26 +168,20 @@ class Point2d
     @y = y
   end
   
+  def graph_obj?()    true  end
+  def point?()        true  end
+  def point2d?()      true  end
+  
   def x() @x end
   def y() @y end
-  def point2d?() true end
   def invariant?() x.point1d? and y.point1d? end
   def self.[](*args); check_inv(self.new(*args)) end
   def ==(o) self.equal?(o) or (o.point2d? and self.x == o.x and self.y == o.y) end
   def to_s() "#{self.class.name}[#{self.x},#{self.y}]" end
   
-  def shape_include?(point)
-    check_pre(point.point2d?)
-    self == point
-  end
-  
   def translate(point)
     check_pre(point.point2d?)
     Point2d[x.translate(point.x), y.translate(point.y)]
-  end
-  
-  def bounds
-    self
   end
   
   def equal_by_dim?(obj1d)
@@ -211,10 +195,7 @@ class Point2d
   end
   
    def equal_by_trans?(obj)
-     if       not self.equal_by_dim?(obj) then false
-     elsif    not obj.range1d?            then false
-     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
-     end
+     self.equal_by_dim?(obj) and obj.point2d?
    end
   
   def shift(point)
@@ -230,9 +211,14 @@ class Range2d
     @y_range = y_range
   end
   
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape2d?()      true  end
+  def prim_shape?()   true  end
+  def range2d?()      true  end 
+  
   def x_range() @x_range end
   def y_range() @y_range end
-  def range2d?() true end 
   def self.[](*args); check_inv(self.new(*args)) end
   def ==(o) self.equal?(o) or (o.range2d? and self.x_range == o.x_range and self.y_range == o.y_range) end
   def to_s() "#{self.class.name}[#{self.x_range},#{self.y_range}]" end
@@ -283,13 +269,19 @@ class Union2d
     @right = right
   end
   
+  def graph_obj?()    true  end
+  def shape?()        true  end
+  def shape2d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
+  def union2d?()      true  end
+  
   def left() @left end
   def right() @right end
-  def union2d?() true end
   def self.[](*args); check_inv(self.new(*args)) end
   def ==(o) self.equal?(o) or (o.union2d? and self.left == o.left and self.right == o.right) end
   def to_s() "#{self.class.name}[#{self.x_range},#{self.y_range}]" end
-  def invariant?() shape2d?(left) and shape2d?(right) end
+  def invariant?() left.shape2d? and right.shape2d? end
   
   def shape_include?(point)
     check_pre(point.point2d?)
@@ -337,39 +329,6 @@ def shape2d?(o)
   o.range2d? or o.union2d?
 end
 
-##
-# Dimensionsunabhängig
-##
-
-#Point ::= point1d | point2d
-def point?(o)
-  point1d?(o) or o.point2d?
-end
-
-#PrimShape ::= Range1d | Range2d
-def prim_shape?(o)
-  range1d?(o) or o.range2d?
-end
-
-#UnionShape ::= Union1d | Union2d
-def union_shape?(o)
-  o.union1d? or o.union2d?
-end
-
-#CompShape? ::= UnionShape
-def comp_shape?(o)
-  union_shape?(o)
-end
-
-#Shape? ::= PrimShape | CompShape
-def shape?(o)
-  prim_shape?(o) or comp_shape?(o)
-end
-
-#Graphobj ::= Point | Shape
-def graph_obj?(o)
-  point?(o) or shape?(o)
-end
 
 ###
 #Class_To_Dim
@@ -396,6 +355,15 @@ class Object
   def point2d?() false end
   def range2d?() false end
   def union2d?() false end
+  
+  def point?()        false end
+  def shape1d?()      false end
+  def shape2d?()      false end
+  def shape?()        false end
+  def prim_shape?()   false end
+  def union_shape?()  false end
+  def comp_shape?()   false end
+  def graph_obj?()    false end
 end
 
 

@@ -26,9 +26,10 @@ class GraphObject
   def bounds() abstract end
   #translate ::= Shape x Point -> Shape
   def translate() abstract end
-  #translate ::= Shape x Shape -> Point
+  #shift ::= GraphObj x GraphObj -> Point
   def shift()     abstract end
   
+  #== ::= Class x Class -> bool
   def ==(o) abstract end
   #to_s ::= Shape | Point -> String
   def to_s() abstract end
@@ -36,11 +37,43 @@ end
 
 #Shape  #
 class Shape < GraphObject
+  def shape?() true end
+end
+
+#Point #
+class Point < GraphObject
+  def point?() true end
+  def equal_by_tree?(obj) self == obj end
+  def equal_by_trans?(obj)
+     self.equal_by_dim?(obj) and obj.point?
+  end
+end
+
+class UnionShape < Shape
+  def union_shape?() true end
   def initialize(left,right) @left = left; @right = right end
   attr_reader :left, :right
-  def shape?() true end
-  def ==(o) self.equal?(o) or ((self.left == o.left) and (self.right == o.right)) end  #Range1d? und so fehlt, wie bauen wir das ein?
+  def ==(o) self.equal?(o) or ((self.left == o.left) and (self.right == o.right)) end
   def to_s() "#{self.class.name}[#{self.left.to_s},#{self.right.to_s}]" end
+  
+  def invariant?()
+    left.shape? and right.shape?
+    left.dim == self.dim and right.dim == self.dim
+  end
+  
+  def shape_include?(point)
+    check_pre(self.equal_by_dim?(point))
+    left.shape_include?(point) or right.shape_include?(point)
+  end
+  
+  def translate(point)
+    check_pre(self.equal_by_dim?(point))
+    self.class[left.translate(point), right.translate(point)]
+  end
+  
+  def equal_by_tree?(obj)
+    obj.left == self.left and obj.right == self.right
+  end
   
   def equal_by_trans?(obj)
      if       not self.equal_by_dim?(obj)             then false
@@ -48,44 +81,20 @@ class Shape < GraphObject
      else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
      end
   end
-  
-  def equal_by_tree?(obj)
-#    if not self.equal_by_class?(obj) then false
-    obj.left == self.left and obj.right == self.right
-#    end
-  end
 end
 
-#Point #
-class Point < GraphObject
-  def point?() true end
-  def shape_include?(point); self == point end  #point.point1d? rausgenommen
-  def bounds() self end
-end
-
-#point1d ::= int
+#Point1d ::= Point1d(x) :: int
 class Point1d < Point
   def initialize(x)
     @x = x
   end
   
-  def x() @x end
+  attr_reader :x
   def invariant?() x.int? end
   def point1d?() true end
   def ==(o) self.equal?(o) or (o.point1d? and (self.x == o.x)) end
   def to_s() "#{self.class.name}[#{self.x.to_s}]" end
   def dim() 1 end
-  
-  def equal_by_tree?(obj)
-    self == obj
-  end
-  
-  def equal_by_trans?(obj)
-     if     not self.equal_by_dim?(obj) then false
-     elsif  not obj.point1d? then false
-     else   true
-     end
-  end 
 
   def translate(point)
     Point1d[self.x + point.x]
@@ -99,49 +108,65 @@ end
 
 #Range1d ::= range[first, last] :: Point1d x Point1d
 class Range1d < Shape
+  def initialize(first,last)
+    @first = first
+    @last = last
+  end
+  
+  attr_reader :first, :last
   
   def dim() 1 end
-  def range1d?() true end
-  def invariant?() left.point1d? and right.point1d? end
+  def range1d?()    true end
+  def shape1d?()    true  end
+  def prim_shape?() true  end
+  def invariant?() first.point1d? and last.point1d? end
+  
+  def ==(o) self.equal?(o) or ((self.first == o.first) and (self.last == o.last)) end
+  def to_s() "#{self.class.name}[#{self.first.to_s},#{self.last.to_s}]" end
+  
+  def equal_by_tree?(obj)
+    obj.first == self.first and obj.last == self.last
+  end
   
   def shape_include?(point)
     check_pre(point.point1d?)
-    (left.x..right.x).include?(point.x)
+    (first.x..last.x).include?(point.x)
   end
   
   def translate(point)
     check_pre(point.point1d?)
-    Range1d[left.translate(point), right.translate(point)]
+    Range1d[first.translate(point), last.translate(point)]
   end
   
   def bounds() self end
   
   def shift(obj)
    check_pre((self.equal_by_dim?(obj) and obj.range1d?))
-   P1D[self.left.x - obj.left.x]
+   Point1d[self.first.x - obj.first.x]
+  end
+  
+   def equal_by_trans?(obj)
+     if       not self.equal_by_dim?(obj)             then false
+     elsif    not self.equal_by_class?(obj)           then false
+     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
+     end
   end
 end
 
 #Union1d ::= Union1d[left, right] :: shape1d x shape1d
-class Union1d < Shape
+class Union1d < UnionShape
   
   def dim() 1 end
-  def union1d?() true end
-  def invariant?() shape1d?(left) and shape1d?(right) end
   
-  def shape_include?(point)
-    check_pre(point.point1d?)
-    left.shape_include?(point) or right.shape_include?(point)
-  end
-  
-  def translate(point)
-    check_pre(point.point1d?)
-    Union1d[left.translate(point), right.translate(point)]
-  end
+  #Predicates
+  def union1d?()      true  end
+  def shape1d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
   
   def bounds #man könnte mit type arbeiten hier, und range1d aus dem type herausholen?
     if left.range1d? and right.range1d?
-      Range1d[((left.left.x <= right.left.x) ? left.left : right.left),((left.right.x >= right.right.x) ? left.right : right.right)]
+      Range1d[((left.first.x <= right.first.x) ? left.first : right.first),((left.last.x >= right.last.x) ? left.last : right.last)]
     elsif left.union1d? or right.union1d? then Union1d[left.bounds, right.bounds].bounds
     else check_pre(false)
     end
@@ -149,13 +174,8 @@ class Union1d < Shape
   
   def shift(obj)
    check_pre((self.equal_by_dim?(obj)))
-   P1D[(self.bounds.left.shift(obj.bounds.left)).x]
+   Point1d[(self.bounds.first.shift(obj.bounds.first)).x]
   end
-end
-
-#Shape1d ::= Range1d | Union1d
-def shape1d?(o)
-  o.union1d? or o.range1d?
 end
 
 ##
@@ -170,8 +190,7 @@ class Point2d < Point
   end
   
   def dim() 2 end
-  def x() @x end
-  def y() @y end
+  attr_reader :x, :y
   def point2d?() true end
   def invariant?() x.point1d? and y.point1d? end
   def ==(o) self.equal?(o) or (o.point2d? and self.x == o.x and self.y == o.y) end
@@ -182,98 +201,99 @@ class Point2d < Point
     Point2d[x.translate(point.x), y.translate(point.y)]
   end
   
-  def equal_by_tree?(obj)
-    if not obj.point2d? then false
-    else self.x == obj.x and self.y == obj.y
-    end
-  end
-  
-   def equal_by_trans?(obj)
-     if       not self.equal_by_dim?(obj) then false
-     elsif    not obj.range1d?            then false
-     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
-     end
-   end
-  
   def shift(point)
    check_pre((self.equal_by_dim?(point) and point.point2d?))
-   P2D[P1D[self.x.x - point.x.x],P1D[self.y.x - point.y.x]]
+   Point2d[Point1d[self.x.x - point.x.x],Point1d[self.y.x - point.y.x]]
   end
 end
 
 #Range2d ::= Range2d[x_range, y_range] :: Range1d x Range1d
 class Range2d < Shape
+  def initialize(x_range,y_range)
+    @x_range = x_range
+    @y_range = y_range
+  end
   
+  attr_reader :x_range,:y_range
   def dim() 2 end
-  def range2d?() true end 
-  def invariant?() left.range1d? and right.range1d? end
+  def range2d?()      true  end 
+  def shape2d?()      true  end
+  def prim_shape?()   true  end
+  
+  def invariant?() x_range.range1d? and y_range.range1d? end
+  def bounds() self end
+  def ==(o) self.equal?(o) or ((self.x_range == o.x_range) and (self.y_range == o.y_range)) end  #Range1d? und so fehlt, wie bauen wir das ein?
+  def to_s() "#{self.class.name}[#{self.x_range.to_s},#{self.y_range.to_s}]" end
+  
+  def equal_by_tree?(obj)
+    obj.x_range == self.x_range and obj.y_range == self.y_range
+  end
   
   def shape_include?(point)
     check_pre(point.point2d?)
-      left.shape_include?(point.x) and
-      right.shape_include?(point.y)  
+      x_range.shape_include?(point.x) and
+      y_range.shape_include?(point.y)  
   end
   
   def translate(point)
     check_pre(point.point2d?)
-    Range2d[left.translate(point.x), right.translate(point.y)]
+    Range2d[x_range.translate(point.x), y_range.translate(point.y)]
   end
   
-  def bounds
-    self
+  def shift(range)
+   check_pre((self.equal_by_dim?(range)))
+   Point2d[self.x_range.shift(range.x_range), self.y_range.shift(range.y_range)]
   end
   
-  def shift(point)
-   check_pre((self.equal_by_dim?(point)))
-   Point2d[self.left.shift(point.left), self.right.shift(point.right)]
+   def equal_by_trans?(obj)
+     if       not self.equal_by_dim?(obj)             then false
+     elsif    not self.equal_by_class?(obj)           then false
+     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
+     end
   end
+  
 end
 
 #Union2d ::= Union2d[left, right] :: Shape2d x Shape2d
-class Union2d < Shape
+class Union2d < UnionShape
   
   def dim() 2 end
-  def union2d?() true end
-  def invariant?() shape2d?(left) and shape2d?(right) end
   
-  def shape_include?(point)
-    check_pre(point.point2d?)
-      left.shape_include?(point) or 
-      right.shape_include?(point)
-  end
-  
-  def translate(point)
-    check_pre(point.point2d?)
-    Union2d[left.translate(point), right.translate(point)]
-  end
+  #Predicates
+  def union2d?()      true  end
+  def shape2d?()      true  end
+  def comp_shape?()   true  end
+  def union_shape?()  true  end
   
   def bounds
     if left.range2d? and right.range2d?
-      Range2d[Union1d[left.left, right.left].bounds, Union1d[left.right, right.right].bounds]
+      Range2d[Union1d[left.x_range, right.x_range].bounds, Union1d[left.y_range, right.y_range].bounds]
     elsif left.union2d? or right.union2d? then Union2d[left.bounds, right.bounds].bounds
     end
   end
   
   def shift(point)
    check_pre((self.equal_by_dim?(point)))
-   Point2d[self.bounds.left.shift(point.bounds.left), self.bounds.right.shift(point.bounds.right)]
+   Point2d[self.bounds.x_range.shift(point.bounds.x_range), self.bounds.y_range.shift(point.bounds.y_range)]
   end
 end
 
-#Shape2d ::= Range2d | Union2d
-def shape2d?(o)
-  o.range2d? or o.union2d?
-end
+###
+#Difference classes
+###
 
-
-class Diff1d
+#Diff1d ::= (left, right) :::: Shape1d x Shape1d -> Shape1d
+class Diff1d < Shape
   def initialze(left, right)
     @left = left
     @right = right
   end
   
   attr_reader :left,:right
-  def diff1d?() true end
+  def diff1d?()       true  end
+  def shape2d?()      true  end
+  def comp_shape?()   true  end
+  
   def invariant?() left.equal_by_dim?(right) and shape1d?(left) and shape1d?(right) end
   def self.[](*args); check_inv(self.new(*args)) end
   
@@ -306,14 +326,17 @@ class Diff1d
   end
 end
 
-class Diff2d
+#Diff2d ::= (left, right) :::: Shape2d x Shape2d -> Shape2d
+class Diff2d < Shape
   def initialze(left, right)
     @left = left
     @right = right
   end
   
   attr_reader :left,:right
-  def diff2d?() true end
+  def diff2d?()       true  end
+  def shape2d?()      true  end
+  def comp_shape?()   true  end
   
   def shape_include?(point)
     left.shape_include?(point) and not right.shape_include?(point)
@@ -351,9 +374,14 @@ end
 ### 
 
 class Object
-  def graph_obj?() false end
-  def point?() false end
-  def shape?() false end
+  def graph_obj?()    false end
+  def point?()        false end
+  def shape?()        false end
+  def shape1d?()      false end
+  def shape2d?()      false end
+  def prim_shape?()   false end
+  def union_shape?()  false end
+  def comp_shape?()   false end
   
   def point1d?() false end
   def range1d?() false end
@@ -364,34 +392,4 @@ class Object
   
   def diff1d?() false end
   def diff2d?() false end
-end
-
-
-
-
-
-
-
-
-
-
-
-##
-# Dimensionsunabhängig
-##
-#
-#
-#PrimShape ::= Range1d | Range2d
-def prim_shape?(o)
-  range1d?(o) or o.range2d?
-end
-
-#UnionShape ::= Union1d | Union2d
-def union_shape?(o)
-  o.union1d? or o.union2d?
-end
-
-#CompShape? ::= UnionShape
-def comp_shape?(o)
-  union_shape?(o)
 end

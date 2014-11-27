@@ -25,7 +25,7 @@ class Day
   Day_Index = (0..(Days_In_Week-1)).to_a
 
   # predicates, invariant, initialize
-  attr_accessor :value
+  attr_reader :value
   def initialize(val)   @value = val                end
   def invariant?()      value.in?(values)           end
   def values()          abstract                    end

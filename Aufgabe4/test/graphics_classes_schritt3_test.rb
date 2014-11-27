@@ -15,18 +15,15 @@ R2D = Range2d
 U2D = Union2d
 
 class Graphics_classes_test < Test::Unit::TestCase
-  def test_shape_include?
+    def test_shape_include?
     #1D
-    assert_equal(true, R1D[P1D[2],P1D[4]].shape_include?(P1D[3]))
     assert_equal(true, U1D[R1D[P1D[1],P1D[3]],R1D[P1D[5],P1D[7]]].shape_include?(P1D[2]))
-    assert_equal(false,P1D[2].shape_include?(P1D[3]))
+    assert_equal(true, R1D[P1D[2],P1D[4]].shape_include?(P1D[3]))
     
     #2D
     assert_equal(true, R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]].shape_include?(P2D[P1D[3],P1D[5]]))
     assert_equal(false, R2D[R1D[P1D[3],P1D[8]],R1D[P1D[8],P1D[3]]].shape_include?(P2D[P1D[3],P1D[76]]))
-    
-    assert_equal(true, P2D[P1D[4], P1D[5]].shape_include?(P2D[P1D[4], P1D[5]]))
-    assert_equal(false, P2D[P1D[4], P1D[5]].shape_include?(P2D[P1D[4], P1D[7]]))
+
     assert_equal(true, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[15],P1D[20]],R1D[P1D[30],P1D[31]]]].shape_include?(P2D[P1D[16],P1D[30]]))
     assert_equal(false, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[15],P1D[20]],R1D[P1D[30],P1D[31]]]].shape_include?(P2D[P1D[14],P1D[30]]))
     assert_equal(true, U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], U2D[R2D[R1D[P1D[3],P1D[8]],R1D[P1D[3],P1D[6]]], R2D[R1D[P1D[4],P1D[401]],R1D[P1D[30],P1D[31]]]]].shape_include?(P2D[P1D[14],P1D[30]]))
@@ -47,13 +44,12 @@ class Graphics_classes_test < Test::Unit::TestCase
     
   def test_bounds
     #1D
-    assert_equal(P1D[2], P1D[2].bounds)
     assert_equal(R1D[P1D[3],P1D[7]], R1D[P1D[3],P1D[7]].bounds)
-    assert_equal(R1D[P1D[2],P1D[5]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[4], P1D[5]]].bounds)
-    assert_equal(R1D[P1D[1],P1D[19]],U1D[R1D[P1D[1], P1D[3]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[13], P1D[19]]]].bounds)
+    assert_equal(R1D[P1D[2], P1D[5]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[4], P1D[5]]].bounds)
+    assert_equal(R1D[P1D[1], P1D[19]], U1D[R1D[P1D[1], P1D[3]], U1D[R1D[P1D[2], P1D[3]], R1D[P1D[13], P1D[19]]]].bounds)
     
     #2D
-    assert_equal(R2D[R1D[P1D[1],P1D[10]], R1D[P1D[9],P1D[16]]], U2D[ R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[3],P1D[10]],R1D[P1D[9],P1D[16]]]].bounds)
+    assert_equal(R2D[R1D[P1D[3],P1D[10]], R1D[P1D[9],P1D[16]]], U2D[ R2D[R1D[P1D[3],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[3],P1D[10]],R1D[P1D[9],P1D[16]]]].bounds)
     assert_equal(R2D[R1D[P1D[1],P1D[10]], R1D[P1D[4],P1D[25]]], U2D[ R2D[R1D[P1D[3],P1D[10]],R1D[P1D[11],P1D[16]]],U2D[ R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]]].bounds)
   end
   
@@ -62,6 +58,9 @@ class Graphics_classes_test < Test::Unit::TestCase
     assert_equal(false, P1D[3].equal_by_dim?(R2D[R1D[P1D[1],P1D[10]], R1D[P1D[4],P1D[25]]]))
     assert_equal(true, U2D[R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]].equal_by_dim?(P2D[P1D[2], P1D[4]]))
     
+    assert_equal(true, P1D[5].equal_by_tree?(P1D[5]))
+    assert_equal(true, P2D[P1D[5], P1D[3]].equal_by_tree?(P2D[P1D[5], P1D[3]]))
+    assert_equal(false,P2D[P1D[2], P1D[3]].equal_by_tree?(P2D[P1D[5], P1D[3]]))
     assert_equal(true, R1D[P1D[43],P1D[46]].equal_by_tree?(R1D[P1D[43],P1D[46]]))
     assert_equal(true, R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]].equal_by_tree?(R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]]))
     assert_equal(false,R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]].equal_by_tree?(R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[15]]]))
@@ -90,7 +89,7 @@ class Graphics_classes_test < Test::Unit::TestCase
   
     #2D
     assert_equal(false, P2D[P1D[4], P1D[2]].equal_by_trans?(P1D[4]))
-    assert_equal(false, P2D[P1D[6],P1D[8]].equal_by_trans?(P2D[P1D[7], P1D[16]]))
+    assert_equal(true,  P2D[P1D[6],P1D[8]].equal_by_trans?(P2D[P1D[7], P1D[16]]))
     assert_equal(true,  R2D[R1D[P1D[3],P1D[9]], R1D[P1D[1],P1D[12]]].equal_by_trans?(R2D[R1D[P1D[10],P1D[16]], R1D[P1D[3],P1D[14]]]))
     assert_equal(false, R2D[R1D[P1D[8],P1D[14]], R1D[P1D[1],P1D[12]]].equal_by_trans?(R2D[R1D[P1D[13], P1D[20]], R1D[P1D[200], P1D[14]]]))
     assert_equal(true , U2D[R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]].equal_by_trans?(U2D[R2D[R1D[P1D[3],P1D[12]],R1D[P1D[13],P1D[18]]],R2D[R1D[P1D[4],P1D[10]],R1D[P1D[6],P1D[27]]]]))
