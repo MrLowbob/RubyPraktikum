@@ -13,6 +13,8 @@ U1D = Union1d
 P2D = Point2d 
 R2D = Range2d
 U2D = Union2d
+D1D = Diff1d
+D2D = Diff2d
 
 class Graphics_classes_test < Test::Unit::TestCase
     def test_shape_include?
@@ -129,5 +131,15 @@ class Graphics_classes_test < Test::Unit::TestCase
     
     assert_equal(false,Diff2d[U2D[R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]], R2D[R1D[P1D[3],P1D[4]],R1D[P1D[12],P1D[90]]]].equal_by_trans?(Diff2d[U2D[R2D[R1D[P1D[1],P1D[30]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[2],P1D[25]]]], R2D[R1D[P1D[3],P1D[4]],R1D[P1D[12],P1D[90]]]]) )
     assert_equal(true, Diff2d[U2D[R2D[R1D[P1D[1],P1D[10]],R1D[P1D[11],P1D[16]]],R2D[R1D[P1D[2],P1D[8]],R1D[P1D[4],P1D[25]]]], R2D[R1D[P1D[3],P1D[4]],R1D[P1D[12],P1D[90]]]].equal_by_trans?(Diff2d[U2D[R2D[R1D[P1D[3],P1D[12]],R1D[P1D[13],P1D[18]]],R2D[R1D[P1D[4],P1D[10]],R1D[P1D[6],P1D[27]]]], R2D[R1D[P1D[5],P1D[6]],R1D[P1D[14],P1D[92]]]]) )
+  end
+  
+  def test_operators
+    assert_equal(U1D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]], R1D[P1D[3],P1D[5]] + R1D[P1D[4],P1D[6]])
+    assert_equal(D1D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]], R1D[P1D[3],P1D[5]] - R1D[P1D[4],P1D[6]])
+    assert_equal(D1D[U1D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]], R1D[P1D[4],P1D[6]]], R1D[P1D[3],P1D[5]] + R1D[P1D[4],P1D[6]] - R1D[P1D[4],P1D[6]])
+    assert_equal(U2D[R2D[R1D[P1D[3],P1D[5]],R1D[P1D[3],P1D[5]]],R2D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]]], R2D[R1D[P1D[3],P1D[5]],R1D[P1D[3],P1D[5]]] + R2D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]])
+    assert_equal(D2D[R2D[R1D[P1D[3],P1D[5]],R1D[P1D[3],P1D[5]]],R2D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]]], R2D[R1D[P1D[3],P1D[5]],R1D[P1D[3],P1D[5]]] - R2D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]])
+    assert_raise(RuntimeError) {R2D[R1D[P1D[3],P1D[5]],R1D[P1D[3],P1D[5]]] + R1D[P1D[4],P1D[6]]}
+    assert_raise(RuntimeError) {R1D[P1D[3],P1D[5]] - R2D[R1D[P1D[3],P1D[5]],R1D[P1D[4],P1D[6]]]}
   end
 end

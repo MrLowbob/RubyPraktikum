@@ -62,6 +62,23 @@ class Shape < GraphObject
   #Predicates
   def shape?() true end
   
+  #Operations/Methods
+  def +(shape)
+    check_pre((equal_by_dim?(shape) and shape.shape?))
+    if    self.dim == 1 then  Union1d[self, shape]
+    elsif self.dim == 2 then  Union2d[self, shape]
+    else  check_pre false #Werkzeug für mehrfachvererbung
+    end                   #noch nicht in Vorlesung behandelt.
+  end
+  
+    def -(shape)
+    check_pre((equal_by_dim?(shape) and shape.shape?))
+    if    self.dim == 1 then  Diff1d[self, shape]
+    elsif self.dim == 2 then  Diff2d[self, shape]
+    else  check_pre false #Werkzeug für mehrfachvererbung
+    end                   #noch nicht in Vorlesung behandelt.
+  end
+  
   #Equals
   def equal_by_tree?(obj)
     obj.left == self.left and obj.right == self.right
@@ -93,6 +110,12 @@ class Point < GraphObject
   end
 end
 
+###
+#PrimShape
+###
+class PrimShape < Shape
+  def prim_shape?() true  end
+end
 ###
 # CompShape
 ###
@@ -167,7 +190,7 @@ end
 ###
 #Range1d ::= range[first, last] :: Point1d x Point1d
 ###
-class Range1d < Shape
+class Range1d < PrimShape
   #Initialization
   def first() @left end
   def last()  @right end
@@ -178,7 +201,6 @@ class Range1d < Shape
   def predicate() self.range1d? end
   def range1d?()    true  end
   def shape1d?()    true  end
-  def prim_shape?() true  end
   
   #Operations/Methods
   def shape_include?(point)
@@ -268,7 +290,7 @@ end
 ###
 #Range2d ::= Range2d[x_range, y_range] :: Range1d x Range1d
 ###
-class Range2d < Shape
+class Range2d < PrimShape
   #Initializations
   def x_range() @left  end
   def y_range() @right end
@@ -278,7 +300,6 @@ class Range2d < Shape
   #Predicates
   def range2d?()      true  end 
   def shape2d?()      true  end
-  def prim_shape?()   true  end
   def predicate() self.range2d? end
   
   #Operations/Methods
