@@ -93,13 +93,36 @@ class Point < GraphObject
   end
 end
 
-class UnionShape < Shape
-  #Initialization
-  def invariant?()
-    left.shape? and right.shape?
-    left.dim == self.dim and right.dim == self.dim
+###
+# CompShape
+###
+class CompShape < Shape
+  #Init
+  def invariant?()  left.shape? and right.shape? and
+                    self.equal_by_dim?(left) and self.equal_by_dim?(right) end
+                
+  #Predicates
+  def comp_shape?()  true  end
+  
+  #Operations/Methods 
+  def translate(point)
+    check_pre(self.equal_by_dim?(point))
+    self.class[left.translate(point), right.translate(point)]
   end
   
+  #Equals  
+  def equal_by_trans?(obj)
+    if       not self.equal_by_dim?(obj)   then false
+    elsif    not self.equal_by_class?(obj) then false
+    else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
+    end
+  end
+end
+
+###
+#UnionShape
+###
+class UnionShape < CompShape
   #Predicates
   def union_shape?() true end
 
@@ -108,22 +131,11 @@ class UnionShape < Shape
     check_pre(self.equal_by_dim?(point))
     left.shape_include?(point) or right.shape_include?(point)
   end
-  
-  def translate(point)
-    check_pre(self.equal_by_dim?(point))
-    self.class[left.translate(point), right.translate(point)]
-  end
-  
-  #Equals
-  def equal_by_trans?(obj)
-     if       not self.equal_by_dim?(obj)             then false
-     elsif    not self.equal_by_class?(obj)           then false
-     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
-     end
-  end
 end
 
+###
 #Point1d ::= Point1d(x) :: int
+###
 class Point1d < Point
   #Initialization
   def initialize(x) @x = x end
@@ -152,7 +164,9 @@ class Point1d < Point
   def to_s()  "#{self.class.name}[#{self.x.to_s}]" end
 end
 
+###
 #Range1d ::= range[first, last] :: Point1d x Point1d
+###
 class Range1d < Shape
   #Initialization
   def first() @left end
@@ -185,16 +199,16 @@ class Range1d < Shape
   end
 end
 
+###
 #Union1d ::= Union1d[left, right] :: shape1d x shape1d
+###
 class Union1d < UnionShape
   #Initialization
   def dim() 1 end
   
   #Predicates
-  def union1d?()      true  end
-  def shape1d?()      true  end
-  def comp_shape?()   true  end
-  def union_shape?()  true  end
+  def union1d?()  true  end
+  def shape1d?()  true  end
   def predicate() self.union1d? end
   
   #Operations/Methods
@@ -216,7 +230,9 @@ end
 # 2-Dimensional graphics
 ##
 
+###
 #Point2d ::= Point1d x Point1d
+###
 class Point2d < Point
   #Initialization
   def initialize(x,y)
@@ -249,7 +265,9 @@ class Point2d < Point
   def to_s() "#{self.class.name}[#{self.x},#{self.y}]" end
 end
 
+###
 #Range2d ::= Range2d[x_range, y_range] :: Range1d x Range1d
+###
 class Range2d < Shape
   #Initializations
   def x_range() @left  end
@@ -283,7 +301,9 @@ class Range2d < Shape
   end
 end
 
+###
 #Union2d ::= Union2d[left, right] :: Shape2d x Shape2d
+###
 class Union2d < UnionShape
   #Initializations
   def dim() 2 end
@@ -291,8 +311,6 @@ class Union2d < UnionShape
   #Predicates
   def union2d?()      true  end
   def shape2d?()      true  end
-  def comp_shape?()   true  end
-  def union_shape?()  true  end
   def predicate() self.union2d? end
   
   #Operations/Methods
@@ -313,90 +331,48 @@ end
 #Difference classes
 ###
 
+###
+#DiffShape
+###
+class DiffShape < CompShape
+  #Predicates
+  def diff_shape?() true  end
+  
+  #Operations/Methods
+  def bounds()  left.bounds end
+  def shape_include?(point)
+    left.shape_include?(point) and not right.shape_include?(point)
+  end
+  
+  def shift(shape)
+    check_pre equal_by_dim?(shape)
+    left.shift(shape.left)
+  end
+end
+###
 #Diff1d ::= (left, right) :::: Shape1d x Shape1d -> Shape1d
-class Diff1d < Shape
+###
+class Diff1d < DiffShape
   #Initializations
   def dim() 1 end
-  def invariant?() left.equal_by_dim?(right) and left.shape1d? and right.shape1d? end
   
   #Predicates
   def diff1d?()       true  end
   def shape1d?()      true  end
-  def comp_shape?()   true  end
   def predicate()     self.diff1d? end
-  
-  #Operations/Methods
-  def shape_include?(point)
-    left.shape_include?(point) and not right.shape_include?(point)
-  end
-  
-  def bounds
-    left.bounds
-  end
-  
-  def translate(point)
-    Diff1d[left.translate(point),right.translate(point)]
-  end
-  
-  def shift(shape)
-    left.shift(shape.left)
-  end
-  
-  #Equals
-  def equal_by_dim?(obj) left.equal_by_dim?(obj) end
-  #Diff1d x Diff1d -> bool
-  def equal_by_tree?(obj) left.equal_by_tree?(obj.left) and right.equal_by_tree?(obj.right) end #zwei Diff vergleichen
-  
-  #Diff1d x Diff1d -> bool
-  def equal_by_trans?(obj)
-     if       not self.equal_by_dim?(obj)   then false
-     elsif    not self.equal_by_class?(obj) then false
-     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
-     end
-  end
 end
 
+###
 #Diff2d ::= (left, right) :::: Shape2d x Shape2d -> Shape2d
-class Diff2d < Shape
+###
+class Diff2d < DiffShape
   #Initializations
-  def invariant?() left.shape2d? and right.shape2d? end
   def dim() 2 end
 
   #Predicates
-  def diff2d?()       true  end
-  def shape2d?()      true  end
-  def comp_shape?()   true  end
+  def diff2d?()   true  end
+  def shape2d?()  true  end
   def predicate() self.diff2d? end
-  
-  #Operations/Methods
-  def shape_include?(point)
-    left.shape_include?(point) and not right.shape_include?(point)
-  end
-  
-  def bounds
-    left.bounds
-  end
-  
-  def translate(point)
-    Diff2d[left.translate(point), right.translate(point)]
-  end
-  
-  def shift(shape)
-    left.shift(shape.left)
-  end
-  
-  #Equals
-  def equal_by_dim?(obj) left.equal_by_dim?(obj) end
-  #Diff2d x Diff2d -> bool
-  def equal_by_tree?(obj) left.equal_by_tree?(obj.left) and right.equal_by_tree?(obj.right) end #zwei Diff vergleichen
-  
-  #Diff2d x Diff2d -> bool
-  def equal_by_trans?(obj)
-     if       not self.equal_by_dim?(obj) then false
-     elsif    not self.equal_by_class?(obj) then false
-     else     self.equal_by_tree?(obj.translate((self.bounds).shift(obj.bounds)))
-     end
-  end
 end
 
 ###
@@ -412,6 +388,7 @@ class Object
   def prim_shape?()   false end
   def union_shape?()  false end
   def comp_shape?()   false end
+  def diff_shape?()   false end
   
   def point1d?() false end
   def range1d?() false end
